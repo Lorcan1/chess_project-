@@ -1,7 +1,67 @@
 import numpy as np 
+import pygame as p
+
+WIDTH = HEIGHT = 512
+DIMENSION = 8
+SQ_SIZE = HEIGHT/DIMENSION
+
+# TO
+# integrate board2.py with main 
+
+def main():
+	chessBoard = np.array([[0 for x in range(8)] for y in range(8)])
+	chessBoard = starting_position(chessBoard)
+
+	print(chessBoard)
+	load_images(chessBoard)
+
+	return
 
 
-chessBoard = np.array([[0 for x in range(8)] for y in range(8)] )
+def starting_position(chessBoard):
+	chessBoard[0, ] = [10,8,9,12,11,9,8,10]
+	chessBoard[1] = 7
+	chessBoard[-2] = 1
+	chessBoard[-1, ] = [4,2,3,6,7,3,2,4]
+
+	return chessBoard
+
+def draw_board(): #some of this should go in main 
+	p.init()
+
+	window = p.display.set_mode((WIDTH, HEIGHT))
+	clock = p.time.Clock()
+
+	run = True
+	while run:
+	    clock.tick(60)
+	    for event in p.event.get():
+	        if event.type == p.QUIT:
+	            run = False
+
+	    window.fill((255, 255, 255))
+
+	    colors = [p.Color('white'),p.Color('gray')]
+	    for i in range(8):
+	      for j in range(8):
+	        color = colors[((i+j) % 2)]
+	        p.draw.rect(window,color,p.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+	        
+
+
+	    p.display.flip()
+
+	p.quit()
+	exit()
+
+
+def load_images(chessBoard):
+	images = {}
+	pieces = ['wP','wN','wB','wR','wQ','wK','bP','bN','bB','bR','bQ','bK']
+	for piece in pieces:
+		images[piece] = p.image.load('images/' + piece + '.png')
+
+
 
 def pawn_moves(row=3, col=3): #add take functionality
 	possible_moves = []
@@ -109,5 +169,8 @@ def king_moves(row=3,col=3):
 
 	return possible_moves
 
-possible_moves = pawn_moves()
-print(possible_moves)
+# possible_moves = pawn_moves()
+# print(possible_moves)
+
+
+main()
