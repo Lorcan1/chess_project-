@@ -33,15 +33,53 @@ def main():
 
 	running = True
 
+	sq_clicked = ()
+	sqs_clicked = []
+
 	while running:
 		for e in p.event.get():
 			if e.type == p.QUIT:
 				running = False
+			elif e.type == p.MOUSEBUTTONDOWN:
+				location = p.mouse.get_pos()
+				col = location[0]//SQ_SIZE
+				row = location[1]//SQ_SIZE
+				sq_clicked = (col,row)
+				sqs_clicked.append(sq_clicked)
+				if len(sqs_clicked) == 2:
+					if sqs_clicked[0] == sqs_clicked[1]:
+						pass
+					else:
+						new_location = sqs_clicked[1]
+						new_col = new_location[0]
+						new_row = new_location[1]
+						chessBoard = move_piece(sqs_clicked[0], sqs_clicked[1], chessBoard)
+						display_image(images, window, chessBoard)
+					sq_clicked = ()
+					sqs_clicked = []
+				else:
+					pass
+		
+
+		
 		draw_board(window)
 		display_image(images,window,chessBoard)
 		clock.tick(15)
 		p.display.flip()
 	return
+
+def move_piece(old_square, new_square, board):
+	old_col,old_row,new_col,new_row = old_square[0], old_square[1],new_square[0],new_square[1]
+	old_col, old_row,new_col,new_row   = int(old_col), int(old_row),int(new_col),int(new_row)
+	temp = board[old_row:old_row+1, old_col:old_col+1]
+	if temp == 0: 
+		pass
+	else:
+		temp = int(temp)
+		board[new_row:new_row+1, new_col:new_col+1] = temp
+		board[old_row:old_row+1, old_col:old_col+1] = 0
+
+	return board
 
 
 def starting_position(chessBoard):
