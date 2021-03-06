@@ -5,8 +5,10 @@ WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT/DIMENSION
 
-# TO
-# integrate board2.py with main 
+# TO DO
+# castling and en passant 
+#move long - see 2 
+
 def load_images():
 	temp = {}
 	pieces = ['wP','wN','wB','wR','wQ','wK','bP','bN','bB','bR','bQ','bK']
@@ -17,9 +19,15 @@ def load_images():
 	images = dict(zip(ini_list, list(temp.values())))
 
 	return images
+
+def starting_position(chessBoard):
+	chessBoard[0,] = [10,8,9,12,11,9,8,10]
+	chessBoard[1] = 7
+	chessBoard[-2] = 1
+	chessBoard[-1,] = [4,2,3,5,6,3,2,4]
+
+	return chessBoard
 	
-
-
 def main():
 	p.init()
 	window = p.display.set_mode((WIDTH, HEIGHT))
@@ -28,6 +36,8 @@ def main():
 
 	chessBoard = np.array([[0 for x in range(8)] for y in range(8)])
 	chessBoard = starting_position(chessBoard)
+	valid_moves = get_all_moves(chessBoard)
+	move_made = False #dont generate moves untill gamestate changes 3-25
 
 	images = load_images()
 
@@ -35,6 +45,7 @@ def main():
 
 	sq_clicked = ()
 	sqs_clicked = []
+	
 
 	while running:
 		for e in p.event.get():
@@ -42,35 +53,68 @@ def main():
 				running = False
 			elif e.type == p.MOUSEBUTTONDOWN:
 				location = p.mouse.get_pos()
-				col = location[0]//SQ_SIZE
+				col = location[0]//SQ_SIZE 
 				row = location[1]//SQ_SIZE
-				sq_clicked = (col,row)
+				sq_clicked = (row,col)
 				sqs_clicked.append(sq_clicked)
 				if len(sqs_clicked) == 2:
-					if sqs_clicked[0] == sqs_clicked[1]:
+					if sqs_clicked[0] == sqs_clicked[1]: #if user clicks same square
 						pass
 					else:
-						new_location = sqs_clicked[1]
-						new_col = new_location[0]
-						new_row = new_location[1]
-						chessBoard = move_piece(sqs_clicked[0], sqs_clicked[1], chessBoard)
+						x= int(sqs_clicked[0][0])#messy same as first few lines as move piece function 
+						y= int(sqs_clicked[0][1])
+						int_tuple = (x,y)
+						i= int(sqs_clicked[1][0])
+						j= int(sqs_clicked[1][1])
+						int_tuple2 = (i,j)
+						for item in valid_moves:
+							if item[0] == int_tuple and item[1] == int_tuple2:
+								chessBoard = move_piece(sqs_clicked[0], sqs_clicked[1], chessBoard)
+								move_made = True
 						display_image(images, window, chessBoard)
 					sq_clicked = ()
 					sqs_clicked = []
 				else:
 					pass
-		
 
-		
+		if move_made:
+			valid_moves = get_all_moves(chessBoard)
 		draw_board(window)
 		display_image(images,window,chessBoard)
 		clock.tick(15)
 		p.display.flip()
+	
 	return
 
+def get_all_moves(board): 
+	counter = 0
+	moves = []
+	hard_moves = [[(6,4),(4,4)]]
+	for i in range(len(board)):
+		for j in range(len(board[i])):
+			# print(len(x[i][j]))
+			# # counter = counter + 1
+			# # print(counter)
+			if board[i][j] == 1 or board[i][j] == 7: #get all pawn moves
+				moves = pawn_moves(moves, i,j,board)
+			elif board[i][j] == 2 or board[i][j] == 8: #get all knight moves 
+				pass
+			elif board[i][j] == 3 or board[i][j] == 9: #get all bishop moves 
+				pass
+			elif board[i][j] == 4 or board[i][j] == 10: #get all rook moves 
+				pass
+			elif board[i][j] == 5 or board[i][j] == 11: #get all queen moves 
+				pass
+			elif board[i][j] == 6 or board[i][j] == 12: #get all king moves 
+				pass
+
+	return moves
+
+	print(counter)
+
 def move_piece(old_square, new_square, board):
-	old_col,old_row,new_col,new_row = old_square[0], old_square[1],new_square[0],new_square[1]
-	old_col, old_row,new_col,new_row   = int(old_col), int(old_row),int(new_col),int(new_row)
+	old_row,old_col,new_row,new_col = old_square[0], old_square[1],new_square[0],new_square[1]
+	old_row, old_col,new_row,new_col  = int(old_row), int(old_col),int(new_row),int(new_col)
 	temp = board[old_row:old_row+1, old_col:old_col+1]
 	if temp == 0: 
 		pass
@@ -82,13 +126,6 @@ def move_piece(old_square, new_square, board):
 	return board
 
 
-def starting_position(chessBoard):
-	chessBoard[0,] = [10,8,9,12,11,9,8,10]
-	chessBoard[1] = 7
-	chessBoard[-2] = 1
-	chessBoard[-1,] = [4,2,3,5,6,3,2,4]
-
-	return chessBoard
 
 def draw_board(window): #some of this should go in main 
  
@@ -102,23 +139,32 @@ def draw_board(window): #some of this should go in main
 	    p.draw.rect(window,color,p.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 	
-def display_image(images, window,chessBoard): #rough outline 
-
-#	window.blit(image,(SQ_SIZE*6,SQ_SIZE*6)) #location of piece
-	counter = 0
+def display_image(images, window,chessBoard):
 	for i in range(8):
 	      for j in range(8):
 	      	piece = chessBoard[i][j]
 	      	if piece != 0:
-	   #   	counter = counter + 1
 		      	window.blit(images[piece], p.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 
-def pawn_moves(row=3, col=3): #add take functionality
-	possible_moves = []
+def pawn_moves(moves,r,c,board): #add take functionality
+	if board[r][c] == 1 and board[r-1][c] == 0 and r != 1:
+		moves.append([(r,c),(r-1,c)]) #if white decrease
+		if r == 6 and board[r-2][c] ==0: #if in starting row, can move twice
+			moves.append([(r,c),(r-2,c)])
+		else:
+			pass
+	elif board[r][c] ==7 and board[r+1][c] == 0 and r != 7:
+		moves.append([(r,c),(r+1,c)]) #if black increase
+		if r == 1 and board[r+2][c] == 0:
+			moves.append([(r,c),(r+2,c)])
+		else:
+			pass
+	else:
+		pass
 
-	possible_moves.append([row+1,col]) #if black 
-	possible_moves.append([row+2,col])
+	return moves
+
 
 	# possible_moves.append([row-1,col]) if white
 	# possible_moves.append([row-2,col])
