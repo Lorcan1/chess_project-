@@ -4,6 +4,8 @@ import pygame as p
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT/DIMENSION
+white_pieces = [1,2,3,4,5,6]
+black_pieces = [7,8,9,10,11,12]
 
 # TO DO
 # castling and en passant 
@@ -98,6 +100,7 @@ def get_all_moves(board):
 			if board[i][j] == 1 or board[i][j] == 7: #get all pawn moves
 				moves = pawn_moves(moves, i,j,board)
 			elif board[i][j] == 2 or board[i][j] == 8: #get all knight moves 
+				#moves = knight_moves(moves, i,j,board)
 				pass
 			elif board[i][j] == 3 or board[i][j] == 9: #get all bishop moves 
 				pass
@@ -162,7 +165,24 @@ def pawn_moves(moves,r,c,board): #add take functionality
 			pass
 	else:
 		pass
+#takes
+	if board[r][c] == 1 and board[r-1][c-1] in black_pieces: #take black
+		moves.append([(r,c),(r-1,c-1)])
+	else:
+		pass
+	if board[r][c] == 1 and c != 7 and board[r-1][c+1] in black_pieces:
+		moves.append([(r,c),(r-1,c+1)])
+	else:
+		pass
 
+	if board[r][c] == 7 and board[r+1][c-1] in white_pieces: #take white
+		moves.append([(r,c),(r+1,c-1)])
+	else:
+		pass
+	if board[r][c] == 7 and c != 7 and board[r+1][c+1] in white_pieces:
+		moves.append([(r,c),(r+1,c+1)])
+	else:
+		pass
 	return moves
 
 
@@ -171,21 +191,33 @@ def pawn_moves(moves,r,c,board): #add take functionality
 
 	return possible_moves
 
-def knight_moves(row = 0, col = 1): 
+def knight_moves(moves,r,c,board): 
 	x = 2
 	y = 1
-
-	possible_moves=	[[row+x, col-y],
-	[row-y, col+x],
-	[row-x, col-y],
-	[row+x, col+y],
-	[row+y, col+x],
-	[row-y, col-x],
-	[row+y,col-x],
-	[row-x,col+y]]
+#moves and takes
+#	if board[r][c] == 2:#w
+	possible_moves=	[[r+x, c-y],
+	[r-y, c+x],
+	[r-x, c-y],
+	[r+x, c+y],
+	[r+y, c+x],
+	[r-y, c-x],
+	[r+y,c-x],   
+	[r-x,c+y]]
 
 	possible_moves = [i for i in possible_moves if i[0] >=0 and i[0] <= 7 and i[1] >=0 and i[1] <= 7 ]
 
+	# if board[r][c] == 2: #if white horse cant move on white pieces but can take black
+	# 	possible_moves = [i for i in possible_moves if board[i[i][0]]][[i[1]] in black_pieces]# or board[i[0]]][[i[1]] ==0]
+	# if board[r][c] == 8: #if black horse cant move on black pieces but can take white
+	# 	possible_moves = [i for i in possible_moves if board[i[0]]][[i[1]] in white_pieces]# or board[i[0]]][[i[1]] == 0]
+
+	for i in possible_moves:
+		if board[i[0]][i[1]] != 0:
+			possible_moves.pop()
+		else:
+			pass
+	
 	return  possible_moves 
 
 def bishop_moves(row = 7, col = 2): 
