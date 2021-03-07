@@ -39,6 +39,8 @@ def main():
 	chessBoard = np.array([[0 for x in range(8)] for y in range(8)])
 	chessBoard = starting_position(chessBoard)
 	valid_moves = get_all_moves(chessBoard)
+	print('/n')
+	print(valid_moves)
 	move_made = False #dont generate moves untill gamestate changes 3-25
 
 	images = load_images()
@@ -94,16 +96,15 @@ def get_all_moves(board):
 	hard_moves = [[(6,4),(4,4)]]
 	for i in range(len(board)):
 		for j in range(len(board[i])):
-			# print(len(x[i][j]))
-			# # counter = counter + 1
-			# # print(counter)
+
 			if board[i][j] == 1 or board[i][j] == 7: #get all pawn moves
 				moves = pawn_moves(moves, i,j,board)
 				pass
 			elif board[i][j] == 2 or board[i][j] == 8: #get all knight moves 
 				moves = knight_moves(moves, i,j,board)
-				#pass
+				pass
 			elif board[i][j] == 3 or board[i][j] == 9: #get all bishop moves 
+				moves = bishop_moves(moves,i,j,board)
 				pass
 			elif board[i][j] == 4 or board[i][j] == 10: #get all rook moves 
 				pass
@@ -131,7 +132,6 @@ def move_piece(old_square, new_square, board):
 
 
 def draw_board(window): #some of this should go in main 
- 
 	colour1 = (235, 235, 208)
 	colour2 = (119, 148, 85)
 
@@ -151,13 +151,13 @@ def display_image(images, window,chessBoard):
 
 
 def pawn_moves(moves,r,c,board): #add take functionality
-	if board[r][c] == 1 and board[r-1][c] == 0 and r != 1:
+	if board[r][c] == 1 and board[r-1][c] == 0 and r != 0:
 		moves.append([(r,c),(r-1,c)]) #if white decrease
 		if r == 6 and board[r-2][c] ==0: #if in starting row, can move twice
 			moves.append([(r,c),(r-2,c)])
 		else:
 			pass
-	elif board[r][c] ==7 and board[r+1][c] == 0 and r != 7:
+	elif r != 7 and board[r][c] == 7 and board[r+1][c] == 0:
 		moves.append([(r,c),(r+1,c)]) #if black increase
 		if r == 1 and board[r+2][c] == 0:
 			moves.append([(r,c),(r+2,c)])
@@ -175,21 +175,16 @@ def pawn_moves(moves,r,c,board): #add take functionality
 	else:
 		pass
 
-	if board[r][c] == 7 and board[r+1][c-1] in white_pieces: #take white
+	if r != 7 and board[r][c] == 7 and board[r+1][c-1] in white_pieces: #take white
 		moves.append([(r,c),(r+1,c-1)])
 	else:
 		pass
-	if board[r][c] == 7 and c != 7 and board[r+1][c+1] in white_pieces:
+	if r != 7 and  board[r][c] == 7 and c != 7 and board[r+1][c+1] in white_pieces:
 		moves.append([(r,c),(r+1,c+1)])
 	else:
 		pass
 	
 	return moves
-
-
-
-	
-	
 
 def knight_moves(moves,r,c,board): 
 	x = 2
@@ -213,34 +208,56 @@ def knight_moves(moves,r,c,board):
 		else:
 			pass		
 			
-	return moves
+	return moves 
 
-
-
-	# return  possible_moves 
-
-def bishop_moves(row = 7, col = 2): 
-
-	#max it can move is 7
-	possible_moves=[]
+def bishop_moves(moves,r,c,board): #remove() doesnt work because it only removes first instance from list 
 	counter = 1
+	stopper1 = True
+	stopper2 = True
+	stopper3 = True
+	stopper4 = True
 
-	while counter <8:
-		
-		row_pos = row+counter 
-		col_pos= col+counter
-		row_neg = row-counter
-		col_neg = col-counter
+	while counter <8: 
+		temp_list1 = [r,c,r+counter,c+counter]
+		temp_list2 = [r,c,r-counter,c-counter]
+		temp_list3 = [r,c,r+counter,c-counter]
+		temp_list4 = [r,c,r-counter,c+counter]
 
-		possible_moves.append([row+counter,col+counter])
-		possible_moves.append([row-counter,col-counter])
-		possible_moves.append([row+counter,col-counter])
-		possible_moves.append([row-counter,col+counter])
-		counter= counter + 1
-	
-	possible_moves = [i for i in possible_moves if i[0] >=0 and i[0] <= 7 and i[1] >=0 and i[1] <= 7 ]
-	
-	return possible_moves
+		if stopper1 and all(i >= 0 and i <=7 for i in temp_list1):
+			if board[r][c] == 3 and board[r+counter][c+counter] in white_pieces or board[r][c] == 9 and board[r+counter][c+counter] in black_pieces:
+				pass
+			else:
+				moves.append([(r,c),(r+counter,c+counter)])
+			if board[r+counter][c+counter] != 0:
+				stopper1 = False
+
+		if stopper2 and all(i >= 0 and i <=7 for i in temp_list2):
+			if board[r][c] == 3 and board[r-counter][c-counter] in white_pieces or board[r][c] == 9 and board[r-counter][c-counter] in black_pieces:
+				pass
+			else:
+				moves.append([(r,c),(r-counter,c-counter)])
+			if board[r-counter][c-counter] != 0:
+				stopper2 = False
+
+		if stopper3 and all(i >= 0 and i <=7 for i in temp_list3):
+			if board[r][c] == 3 and board[r+counter][c-counter] in white_pieces or board[r][c] == 9 and board[r+counter][c-counter] in black_pieces:
+				pass
+			else:
+				moves.append([(r,c),(r+counter,c-counter)])
+			if board[r+counter][c-counter] != 0:
+				stopper3 = False
+
+		if stopper4 and all(i >= 0 and i <=7 for i in temp_list4):
+			if board[r][c] == 3 and board[r-counter][c+counter] in white_pieces or board[r][c] == 9 and board[r-counter][c+counter] in black_pieces:
+				pass
+			else:
+				moves.append([(r,c),(r-counter,c+counter)])
+			if board[r-counter][c+counter] != 0:
+					stopper4 = False
+
+		counter = counter + 1
+
+	return moves
 		
 def rook_moves(row = 3, col =3):
 	possible_moves = []
