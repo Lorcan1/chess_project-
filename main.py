@@ -39,8 +39,6 @@ def main():
 	chessBoard = np.array([[0 for x in range(8)] for y in range(8)])
 	chessBoard = starting_position(chessBoard)
 	valid_moves = get_all_moves(chessBoard)
-	print("lllllllllllllllllllllllllll")
-	print(valid_moves)
 	move_made = False #dont generate moves untill gamestate changes 3-25
 
 	images = load_images()
@@ -72,12 +70,7 @@ def main():
 						j= int(sqs_clicked[1][1])
 						int_tuple2 = (i,j)
 						for item in valid_moves:
-							print('/////////////////////////////')
-							print(item)
-							print(int_tuple)
 							if item[0] == int_tuple and item[1] == int_tuple2:
-								print(int_tuple)
-								print('heyyyyyyyyyyyy')
 								chessBoard = move_piece(sqs_clicked[0], sqs_clicked[1], chessBoard)
 								move_made = True
 						display_image(images, window, chessBoard)
@@ -199,7 +192,6 @@ def pawn_moves(moves,r,c,board): #add take functionality
 	
 
 def knight_moves(moves,r,c,board): 
-	print(type(moves))
 	x = 2
 	y = 1
 	moves.extend([[(r,c),(r+x, c-y)],
@@ -211,16 +203,16 @@ def knight_moves(moves,r,c,board):
 	[(r,c),(r+y,c-x)],   
 	[(r,c),(r-x,c+y)]])
 
-	
+	moves = [i for i in moves if i[1][0] >=0 and i[1][0] <= 7 and i[1][1] >=0 and i[1][1] <= 7 ]
 
-	# moves = [i for i in moves if i[1][0] >=0 and i[1][0] <= 7 and i[1][1] >=0 and i[1][1] <= 7 ]
-
-	# for i in moves:
-	# 	if board[i[1][0]][i[1][1]] != 0:
-	# 		moves.remove(i)
-	# 	else:
-	# 		pass
-
+	for i in moves:
+		if board[i[0][0]][i[0][1]] == 2 and board[i[1][0]][i[1][1]] in white_pieces:
+				moves.remove(i)
+		elif board[i[0][0]][i[0][1]] == 8 and board[i[1][0]][i[1][1]] in black_pieces:
+				moves.remove(i)	
+		else:
+			pass		
+			
 	return moves
 
 
