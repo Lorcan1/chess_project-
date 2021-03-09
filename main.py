@@ -107,10 +107,13 @@ def get_all_moves(board):
 				moves = bishop_moves(moves,i,j,board)
 				pass
 			elif board[i][j] == 4 or board[i][j] == 10: #get all rook moves 
+				moves = rook_moves(moves,i,j,board)
 				pass
 			elif board[i][j] == 5 or board[i][j] == 11: #get all queen moves 
+				moves = queen_moves(moves,i,j,board)
 				pass
 			elif board[i][j] == 6 or board[i][j] == 12: #get all king moves 
+				moves = king_moves(moves,i,j,board)
 				pass
 
 	return moves
@@ -210,112 +213,133 @@ def knight_moves(moves,r,c,board):
 			
 	return moves 
 
+def get_diagonal_moves(moves,r,c,x,y,board,stopper):
+	
+	temp_list = [r,c,x,y]
+
+	if stopper and all(i >= 0 and i <=7 for i in temp_list):
+		if ((board[r][c] == 3 or board[r][c] == 5) and board[x][y] in white_pieces) or ((board[r][c] == 9 or board[r][c] == 11) and board[x][y] in black_pieces):
+			pass
+		else:
+			moves.append([(r,c),(x,y)])
+		if board[x][y] != 0:
+			stopper = False
+
+	return moves, stopper
+
 def bishop_moves(moves,r,c,board): #remove() doesnt work because it only removes first instance from list 
+
 	counter = 1
 	stopper1 = True
 	stopper2 = True
 	stopper3 = True
 	stopper4 = True
 
-	while counter <8: 
-		temp_list1 = [r,c,r+counter,c+counter]
-		temp_list2 = [r,c,r-counter,c-counter]
-		temp_list3 = [r,c,r+counter,c-counter]
-		temp_list4 = [r,c,r-counter,c+counter]
-
-		if stopper1 and all(i >= 0 and i <=7 for i in temp_list1):
-			if board[r][c] == 3 and board[r+counter][c+counter] in white_pieces or board[r][c] == 9 and board[r+counter][c+counter] in black_pieces:
-				pass
-			else:
-				moves.append([(r,c),(r+counter,c+counter)])
-			if board[r+counter][c+counter] != 0:
-				stopper1 = False
-
-		if stopper2 and all(i >= 0 and i <=7 for i in temp_list2):
-			if board[r][c] == 3 and board[r-counter][c-counter] in white_pieces or board[r][c] == 9 and board[r-counter][c-counter] in black_pieces:
-				pass
-			else:
-				moves.append([(r,c),(r-counter,c-counter)])
-			if board[r-counter][c-counter] != 0:
-				stopper2 = False
-
-		if stopper3 and all(i >= 0 and i <=7 for i in temp_list3):
-			if board[r][c] == 3 and board[r+counter][c-counter] in white_pieces or board[r][c] == 9 and board[r+counter][c-counter] in black_pieces:
-				pass
-			else:
-				moves.append([(r,c),(r+counter,c-counter)])
-			if board[r+counter][c-counter] != 0:
-				stopper3 = False
-
-		if stopper4 and all(i >= 0 and i <=7 for i in temp_list4):
-			if board[r][c] == 3 and board[r-counter][c+counter] in white_pieces or board[r][c] == 9 and board[r-counter][c+counter] in black_pieces:
-				pass
-			else:
-				moves.append([(r,c),(r-counter,c+counter)])
-			if board[r-counter][c+counter] != 0:
-					stopper4 = False
+	while counter <8:
+		if stopper1:
+			moves,stopper1 = get_diagonal_moves(moves,r,c,r+counter,c+counter,board,stopper1)
+		if stopper2:
+			moves,stopper2 = get_diagonal_moves(moves,r,c,r-counter,c-counter,board,stopper2)
+		if stopper3:
+			moves,stopper3 = get_diagonal_moves(moves,r,c,r+counter,c-counter,board,stopper3)
+		if stopper4:
+			moves,stopper4 = get_diagonal_moves(moves,r,c,r-counter,c+counter,board,stopper4)
 
 		counter = counter + 1
 
 	return moves
 		
-def rook_moves(row = 3, col =3):
-	possible_moves = []
+def rook_moves(moves,r,c,board):
 
 	counter = 1
-	while counter < 8:
+	stopper1 = True
+	stopper2 = True
+	stopper3 = True
+	stopper4 = True
 
-		possible_moves.append([row,col + counter])
-		possible_moves.append([row + counter, col])
-		possible_moves.append([row, col - counter])
-		possible_moves.append([row - counter, col])
+	while counter <8:
+		if stopper1:
+			moves,stopper1 = get_rook_moves(moves,r,c,r,c+counter,board,stopper1)
+		if stopper2:
+			moves,stopper2 = get_rook_moves(moves,r,c,r+counter,c,board,stopper2)
+		if stopper3:
+			moves,stopper3 = get_rook_moves(moves,r,c,r,c-counter,board,stopper3)
+		if stopper4:
+			moves,stopper4 = get_rook_moves(moves,r,c,r-counter,c,board,stopper4)
 
-		counter= counter + 1
+		counter = counter + 1
 
-	possible_moves = [i for i in possible_moves if i[0] >=0 and i[0] <= 7 and i[1] >=0 and i[1] <= 7 ]
+	return moves
 
-	return possible_moves
 
-def queen_moves(row=3,col=3):
-	possible_moves = []
+def get_rook_moves(moves,r,c,x,y,board,stopper):
+	
+	temp_list = [r,c,x,y]
+
+	if stopper and all(i >= 0 and i <=7 for i in temp_list):
+		if((board[r][c] == 4 or board[r][c] == 5)  and board[x][y] in white_pieces) or ((board[r][c] == 10 or board[r][c] == 11) and board[x][y] in black_pieces):
+			pass
+		else:
+			moves.append([(r,c),(x,y)])
+		if board[x][y] != 0:
+			stopper = False
+
+	return moves, stopper
+
+def queen_moves(moves,r,c,board):
 
 	counter = 1
-	while counter < 8:
+	stopper1 = True
+	stopper2 = True
+	stopper3 = True
+	stopper4 = True
+	stopper5 = True
+	stopper6 = True
+	stopper7 = True
+	stopper8 = True
 
-		possible_moves.append([row,col + counter])
-		possible_moves.append([row + counter, col])
-		possible_moves.append([row, col - counter])
-		possible_moves.append([row - counter, col])
-		possible_moves.append([row+counter,col+counter])
-		possible_moves.append([row-counter,col-counter])
-		possible_moves.append([row+counter,col-counter])
-		possible_moves.append([row-counter,col+counter])
-		counter= counter + 1
+	while counter <8:
+		if stopper1:
+			moves,stopper1 = get_diagonal_moves(moves,r,c,r+counter,c+counter,board,stopper1)
+		if stopper2:
+			moves,stopper2 = get_diagonal_moves(moves,r,c,r-counter,c-counter,board,stopper2)
+		if stopper3:
+			moves,stopper3 = get_diagonal_moves(moves,r,c,r+counter,c-counter,board,stopper3)
+		if stopper4:
+			moves,stopper4 = get_diagonal_moves(moves,r,c,r-counter,c+counter,board,stopper4)
+		if stopper5:
+			moves,stopper5 = get_rook_moves(moves,r,c,r,c+counter,board,stopper5)
+		if stopper6:
+			moves,stopper6 = get_rook_moves(moves,r,c,r+counter,c,board,stopper6)
+		if stopper7:
+			moves,stopper7 = get_rook_moves(moves,r,c,r,c-counter,board,stopper7)
+		if stopper8:
+			moves,stopper8 = get_rook_moves(moves,r,c,r-counter,c,board,stopper8)
 
-	possible_moves = [i for i in possible_moves if i[0] >=0 and i[0] <= 7 and i[1] >=0 and i[1] <= 7 ]
+		counter = counter + 1
 
-	return possible_moves
+	return moves
 
-def king_moves(row=3,col=3):
-	possible_moves=[]
-
+def king_moves(moves,r,c,board):
 	counter = 1
 
-	possible_moves.append([row,col + counter])
-	possible_moves.append([row + counter, col])
-	possible_moves.append([row, col - counter])
-	possible_moves.append([row - counter, col])
-	possible_moves.append([row+counter,col+counter])
-	possible_moves.append([row-counter,col-counter])
-	possible_moves.append([row+counter,col-counter])
-	possible_moves.append([row-counter,col+counter])
+	get_king_moves(moves,r,c,(r),(c + counter),board)
+	get_king_moves(moves,r,c,(r + counter), (c),board)
+	get_king_moves(moves,r,c,(r), (c- counter),board)
+	get_king_moves(moves,r,c,(r - counter), (c),board)
+	get_king_moves(moves,r,c,(r+counter),(c+counter),board)
+	get_king_moves(moves,r,c,(r-counter),(c-counter),board)
+	get_king_moves(moves,r,c,(r+counter),(c-counter),board)
+	get_king_moves(moves,r,c,(r-counter),(c+counter),board)
 
-	possible_moves = [i for i in possible_moves if i[0] >=0 and i[0] <= 7 and i[1] >=0 and i[1] <= 7 ]
+	return moves
 
-	return possible_moves
+def get_king_moves(moves,r,c,x,y,board):
+	if (0 <= x <= 7) and (0 <= y <= 7):
+		if (board[x][y] == 0) or (board[r][c] == 6 and board[x][y] in black_pieces) or (board[r][c] == 12 and board[x][y] in white_pieces):
+			moves.append([(r,c),(x,y)])
 
-# possible_moves = pawn_moves()
-# print(possible_moves)
+	return moves
 
 if __name__ == "__main__" :
 	main()
