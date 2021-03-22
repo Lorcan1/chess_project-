@@ -12,7 +12,10 @@ white_to_move = True
 # castling and en passant 
 #move log - see 2 
 #sometimes after one player moves it gets stuck. (if you click too many times)
-	#a square is getting stuck
+	#after player whos turn it isnt tries to take? not limited to this
+
+#getting checks completed for black
+#king shoudnt be able to move into checkx
 
 def load_images():
 	temp = {}
@@ -120,11 +123,7 @@ def get_all_moves(board,pins):
 				pass
 	return moves
 
-def get_valid_moves(board): 
-	directions = ((-1,0),(1,0),(0,-1),(0,1),(1,1),(-1,-1),(1,-1),(-1,1)) #up,down,left,right , four diagonals
-	checks = []
-	pins = []
-	checkmate = False 
+def get_king_location(board):
 	for i in range(len(board)):
 		for j in range(len(board[i])):
 			if white_to_move is True and board[i][j] == 6:
@@ -133,6 +132,20 @@ def get_valid_moves(board):
 			elif white_to_move is False and board[i][j] == 12: #get all king moves 
 				king_row = i
 				king_col = j
+				
+	return king_row,king_col
+
+def get_valid_moves(board, x=0,y=0): 
+	directions = ((-1,0),(0,-1),(1,0),(0,1),(-1,-1),(-1,1),(1,-1),(1,1)) #up,down,left,right , four diagonals
+	checks = []
+	pins = []
+	checkmate = False 
+
+	if x == 0:
+		king_row,king_col = get_king_location(board)
+	else:
+		king_row = x
+		king_col = y
 
 	for j in range(len(directions)):
 		possible_pin = ()
@@ -160,17 +173,17 @@ def get_valid_moves(board):
 					elif white_to_move is False and board[row][column] in white_pieces: # if white piece, and 
 						enemy_counter = enemy_counter + 1 
 					#	print('Theres a check in town')
-						if board[row][column] == 1:
+						if board[row][column] == 1 and (6<=j<=7) and i == 1:
 							if ally_counter == 0: # add conditions in which pawn is checking king
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
 								break
-						elif board[row][column] == 3 and (4<=j<8):
+						elif board[row][column] == 3 and (4<=j<=7):
 							if ally_counter == 0:
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
 								pins.append(possible_pin)
-						elif board[row][column] == 4 and (0<=j<4):
+						elif board[row][column] == 4 and (0<=j<=3):
 							if ally_counter == 0:
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
@@ -186,14 +199,14 @@ def get_valid_moves(board):
 			else:
 				break
 
-	knight_moves = [(-2,-1),(-1,-2),(-1,2),(-2,1),(2,-1),(1,-2),(1,2),(2,1)]
+	knight_moves = [(-2,-1),(-1,-2),(-1,2),(-2,1),(2,-1),(1,-2),(1,2),(2,1)] #seperate loop needed for knight moves
 	for move in knight_moves:
 		if 0<= king_row+move[0] <=7 and 0<= king_col+move[1] <=7:
 			if white_to_move is False and board[king_row+move[0]][king_col+move[1]] == 2:
 				checks.append((king_row+move[0],king_col+move[1]))
 
 	print(checks)
-	print('heyyyyyyyyyyyyyyyy')
+#	print('heyyyyyyyyyyyyyyyy')
 	return checks,pins,king_row,king_col
 
 
@@ -209,20 +222,22 @@ def resolve_checks(board): #checkmate calculated here
 		check_row = check[0]
 		check_col = check[1]
 
-		# if board[check_row][check_col] == 1:
-		# 	#capture pawn with piece(or king )or move king  (row-king_row ==1 and (column - king_col == -1 or 1))
-		if board[check_row][check_col] ==2:
-			#if knight - must take or move (no block)
+		# if board[check_row][check_col] == 1: #capture pawn 
+		# 	moves = []
+		# 	k_moves = king_moves(moves,king_row,king_col,board)
+		# 	return k_moves
+		if board[check_row][check_col] ==2:#if knight - must take or move (no block)
 			valid_squares = [check_row,check_col]
 		else:
 			for i in range(1,8):
-				print('hi')
+			#	print('hi')
 				valid_square = (king_row + check[2]*i, king_col + check[3]*i) #search in direction of check until attacking piece is reached 
 				valid_squares.append(valid_square)
-				print(valid_squares)
+			#	print(valid_squares)
 				if valid_square == (check_row,check_col):
 					break
-		moves = [move for move in moves if move[1] in valid_squares]				
+		moves = [move for move in moves if move[1] in valid_squares]
+		moves = king_moves(moves,king_row,king_col,board)			
 
 	elif len(checks) == 2:
 		moves = king_moves(moves,king_row,king_col,board) 
@@ -263,7 +278,6 @@ def pawn_moves(moves,r,c,board,pins): #add take functionality
 
  #if pawn is pinned, pawnPinned = True 
  #if true, can only move in direction of pin and cant take 
-
 
 	if white_to_move is True and board[r][c] == 1 and board[r-1][c] == 0 and r != 0:
 		moves.append([(r,c),(r-1,c)]) #if white decrease
@@ -408,9 +422,15 @@ def king_moves(moves,r,c,board): #is a loop more efficient
 	return moves
 
 def get_king_moves(moves,r,c,x,y,board):
+
 	if (0 <= x <= 7) and (0 <= y <= 7):
 		if (board[x][y] == 0) or (board[r][c] == 6 and board[x][y] in black_pieces) or (board[r][c] == 12 and board[x][y] in white_pieces):
-			moves.append([(r,c),(x,y)])
+			checks, pins, king_row, king_col = get_valid_moves(board,x,y)
+			if len(checks) == 0:
+				moves.append([(r,c),(x,y)])
+		else:
+			pass
+
 	return moves
 
 if __name__ == "__main__" :
