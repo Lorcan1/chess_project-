@@ -81,9 +81,12 @@ def main():
 									# print(pins)
 									# print('heyyyyyyyyyyyyyyyyyy')
 									#resolve_checks(chess_board)
+								else: 
+									pass
 							display_image(images, window, chess_board)
 						sq_clicked = ()
 						sqs_clicked = []
+
 				else:
 					pass
 		if move_made:
@@ -106,17 +109,17 @@ def get_all_moves(board,pins):
 				moves = pawn_moves(moves, i,j,board,pins)
 				pass
 			elif board[i][j] == 2 or board[i][j] == 8: #get all knight moves 
-				moves = knight_moves(moves, i,j,board)
+				moves = knight_moves(moves, i,j,board,pins)
 				pass
 			elif board[i][j] == 3 or board[i][j] == 9: #get all bishop moves 
-				moves = bishop_moves(moves,i,j,board)
+				moves = bishop_moves(moves,i,j,board,pins)
 				pass
 			elif board[i][j] == 4 or board[i][j] == 10: #get all rook moves 
-				moves = rook_moves(moves,i,j,board)
+				moves = rook_moves(moves,i,j,board,pins)
 				pass
 			elif board[i][j] == 5 or board[i][j] == 11: #get all queen moves 
-				moves = rook_moves(moves,i,j,board)
-				moves = bishop_moves(moves,i,j,board)
+				moves = rook_moves(moves,i,j,board,pins)
+				moves = bishop_moves(moves,i,j,board,pins)
 				pass
 			elif board[i][j] == 6 or board[i][j] == 12: #get all king moves 
 				moves = king_moves(moves,i,j,board)
@@ -279,13 +282,28 @@ def pawn_moves(moves,r,c,board,pins): #add take functionality
  #if pawn is pinned, pawnPinned = True 
  #if true, can only move in direction of pin and cant take 
 
-	if white_to_move is True and board[r][c] == 1 and board[r-1][c] == 0 and r != 0:
+ 	#if pawn location is in pins:
+ 		#pawn pinned is true
+ 	#pawn cant take, can only move forward if direction is 'straight' (different for black and white)
+
+	if len(pins) == 0:
+		piecePinned = False 
+	else:
+		for pin in pins:
+			if(pin[0] == r and pin[1] == c):
+				piecePinned = True 
+				d = (pin[2],pin[3])
+			else:
+				piecePinned = False
+ 			
+
+	if white_to_move is True and board[r][c] == 1 and board[r-1][c] == 0 and r != 0 and (piecePinned is False or d == (-1,0)):
 		moves.append([(r,c),(r-1,c)]) #if white decrease
 		if r == 6 and board[r-2][c] ==0: #if in starting row, can move twice
 			moves.append([(r,c),(r-2,c)])
 		else:
 			pass
-	elif white_to_move is False and  r != 7 and board[r][c] == 7 and board[r+1][c] == 0:
+	elif white_to_move is False and  r != 7 and board[r][c] == 7 and board[r+1][c] == 0 and (piecePinned is False or d == (1,0)):
 		moves.append([(r,c),(r+1,c)]) #if black increase
 		if r == 1 and board[r+2][c] == 0:
 			moves.append([(r,c),(r+2,c)])
@@ -294,60 +312,88 @@ def pawn_moves(moves,r,c,board,pins): #add take functionality
 	else:
 		pass
 #takes
-	if white_to_move is True and board[r][c] == 1 and board[r-1][c-1] in black_pieces: #take black
-		moves.append([(r,c),(r-1,c-1)])
-	else:
-		pass
-	if white_to_move is True and board[r][c] == 1 and c != 7 and board[r-1][c+1] in black_pieces:
-		moves.append([(r,c),(r-1,c+1)])
-	else:
+	if piecePinned is True:
 		pass
 
-	if white_to_move is False and  r != 7 and board[r][c] == 7 and board[r+1][c-1] in white_pieces: #take white
-		moves.append([(r,c),(r+1,c-1)])
 	else:
-		pass
-	if  white_to_move is False and r != 7 and  board[r][c] == 7 and c != 7 and board[r+1][c+1] in white_pieces:
-		moves.append([(r,c),(r+1,c+1)])
-	else:
-		pass
+		if white_to_move is True and board[r][c] == 1 and board[r-1][c-1] in black_pieces: #take black
+			moves.append([(r,c),(r-1,c-1)])
+		else:
+			pass
+		if white_to_move is True and board[r][c] == 1 and c != 7 and board[r-1][c+1] in black_pieces:
+			moves.append([(r,c),(r-1,c+1)])
+		else:
+			pass
+
+		if white_to_move is False and  r != 7 and board[r][c] == 7 and board[r+1][c-1] in white_pieces: #take white
+			moves.append([(r,c),(r+1,c-1)])
+		else:
+			pass
+		if  white_to_move is False and r != 7 and  board[r][c] == 7 and c != 7 and board[r+1][c+1] in white_pieces:
+			moves.append([(r,c),(r+1,c+1)])
+		else:
+			pass
 	return moves
 
-def knight_moves(moves,r,c,board): #could be done in one for loop
-	x = 2
-	y = 1
-	moves.extend([[(r,c),(r+x, c-y)],
-	[(r,c),(r-y, c+x)],
-	[(r,c),(r-x, c-y)],
-	[(r,c),(r+x, c+y)],
-	[(r,c),(r+y, c+x)],
-	[(r,c),(r-y, c-x)],
-	[(r,c),(r+y,c-x)],   
-	[(r,c),(r-x,c+y)]])
-	moves = [i for i in moves if i[1][0] >=0 and i[1][0] <= 7 and i[1][1] >=0 and i[1][1] <= 7 ]
-	for i in moves:
-		if white_to_move is True and board[i[0][0]][i[0][1]] == 2 and board[i[1][0]][i[1][1]] in white_pieces:
-				moves.remove(i)
-		elif white_to_move is False and  board[i[0][0]][i[0][1]] == 8 and board[i[1][0]][i[1][1]] in black_pieces:
-				moves.remove(i)	
-		else:
-			pass				
+def knight_moves(moves,r,c,board,pins): #could be done in one for loop
+
+	if len(pins) == 0:
+		piecePinned = False 
+	else:
+		for pin in pins:
+			if(pin[0] == r and pin[1] == c):
+				piecePinned = True 
+			else:
+				piecePinned = False
+
+	if piecePinned is False:
+		x = 2
+		y = 1
+		moves.extend([[(r,c),(r+x, c-y)],
+		[(r,c),(r-y, c+x)],
+		[(r,c),(r-x, c-y)],
+		[(r,c),(r+x, c+y)],
+		[(r,c),(r+y, c+x)],
+		[(r,c),(r-y, c-x)],
+		[(r,c),(r+y,c-x)],   
+		[(r,c),(r-x,c+y)]])
+		moves = [i for i in moves if i[1][0] >=0 and i[1][0] <= 7 and i[1][1] >=0 and i[1][1] <= 7 ]
+		for i in moves:
+			if white_to_move is True and board[i[0][0]][i[0][1]] == 2 and board[i[1][0]][i[1][1]] in white_pieces:
+					moves.remove(i)
+			elif white_to_move is False and  board[i[0][0]][i[0][1]] == 8 and board[i[1][0]][i[1][1]] in black_pieces:
+					moves.remove(i)	
+			else:
+				pass
+	else:
+		pass	
 	return moves 
 
-def bishop_moves(moves,r,c,board): #remove() doesnt work because it only removes first instance from list 
+def bishop_moves(moves,r,c,board,pins): #remove() doesnt work because it only removes first instance from list 
+
+	if len(pins) == 0:
+		piecePinned = False 
+	else:
+		for pin in pins:
+			if(pin[0] == r and pin[1] == c):
+				piecePinned = True 
+				d = (pin[2],pin[3])
+			else:
+				piecePinned = False
+
 	counter = 1
 	stopper1 = True
 	stopper2 = True
 	stopper3 = True
 	stopper4 = True
 	while counter <8:
-		if stopper1:
+		if stopper1 and (piecePinned == False or (d == (1,1) or d ==(-1,-1))):
 			moves,stopper1 = get_diagonal_moves(moves,r,c,r+counter,c+counter,board,stopper1)
-		if stopper2:
+		if stopper2 and (piecePinned == False or (d == (-1,-1)or d ==(1,1))):
 			moves,stopper2 = get_diagonal_moves(moves,r,c,r-counter,c-counter,board,stopper2)
-		if stopper3:
+		if stopper3 and (piecePinned == False or (d == (1,-1)or d ==(-1,1))):
 			moves,stopper3 = get_diagonal_moves(moves,r,c,r+counter,c-counter,board,stopper3)
-		if stopper4:
+		if stopper4 and (piecePinned == False or (d == (-1,1)or d ==(1,-1))):
 			moves,stopper4 = get_diagonal_moves(moves,r,c,r-counter,c+counter,board,stopper4)
 		counter = counter + 1
 	return moves
@@ -372,20 +418,30 @@ def get_diagonal_moves(moves,r,c,x,y,board,stopper):
 		
 	return moves, stopper
 		
-def rook_moves(moves,r,c,board):
+def rook_moves(moves,r,c,board,pins):
+
+	if len(pins) == 0:
+		piecePinned = False 
+	else:
+		for pin in pins:
+			if(pin[0] == r and pin[1] == c):
+				piecePinned = True 
+				d = (pin[2],pin[3])
+			else:
+				piecePinned = False
 	counter = 1
 	stopper1 = True
 	stopper2 = True
 	stopper3 = True
 	stopper4 = True
 	while counter <8:
-		if stopper1:
+		if stopper1 and (piecePinned == False or (d == (0,1) or d ==(0,-1))):
 			moves,stopper1 = get_orthogonal_moves(moves,r,c,r,c+counter,board,stopper1)
-		if stopper2:
+		if stopper2 and (piecePinned == False or (d == (1,0) or d ==(-1,0))):
 			moves,stopper2 = get_orthogonal_moves(moves,r,c,r+counter,c,board,stopper2)
-		if stopper3:
+		if stopper3 and (piecePinned == False or (d == (0,-1) or d ==(0,1))):
 			moves,stopper3 = get_orthogonal_moves(moves,r,c,r,c-counter,board,stopper3)
-		if stopper4:
+		if stopper4 and (piecePinned == False or (d == (-1,0) or d ==(1,0))):
 			moves,stopper4 = get_orthogonal_moves(moves,r,c,r-counter,c,board,stopper4)
 		counter = counter + 1
 	return moves
