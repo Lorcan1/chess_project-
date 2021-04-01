@@ -163,35 +163,35 @@ def get_valid_moves(board, x=0,y=0):
 			column = king_col + (direction[1]*i)
 			if ally_counter <2 and enemy_counter < 1:	
 				if (0<=row<=7) and (0<=column<=7):
-					if white_to_move is False and board[row][column] is 0:
+					if white_to_move is False and board[row][column] is 0 or white_to_move is True and board[row][column] is 0:
 						pass
 
-					elif white_to_move is False and board[row][column] in black_pieces: #if black piece next king ally counter is one 
+					elif white_to_move is False and board[row][column] in black_pieces or white_to_move is True and board[row][column] in white_pieces: #if black piece next king ally counter is one 
 						ally_counter = ally_counter + 1
 						if possible_pin == ():
 							possible_pin = (row,column,direction[0],direction[1])
 						else:
 							break
 
-					elif white_to_move is False and board[row][column] in white_pieces: # if white piece, and 
+					elif white_to_move is False and board[row][column] in white_pieces or white_to_move is True and board[row][column] in black_pieces: # if white piece, and 
 						enemy_counter = enemy_counter + 1 
 					#	print('Theres a check in town')
-						if board[row][column] == 1 and (6<=j<=7) and i == 1:
+						if (6<=j<=7) and i == 1 and (board[row][column] == 1 or board[row][column] == 7):
 							if ally_counter == 0: # add conditions in which pawn is checking king
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
 								break
-						elif board[row][column] == 3 and (4<=j<=7):
+						elif (4<=j<=7) and (board[row][column] == 3 or board[row][column] == 9) :
 							if ally_counter == 0:
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
 								pins.append(possible_pin)
-						elif board[row][column] == 4 and (0<=j<=3):
+						elif (0<=j<=3) and (board[row][column] == 4 or board[row][column] == 10) :
 							if ally_counter == 0:
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
 								pins.append(possible_pin)
-						elif board[row][column] == 5:
+						elif board[row][column] == 5 or board[row][column] == 11:
 							if ally_counter == 0:
 								checks.append((row,column,direction[0],direction[1]))
 							elif ally_counter == 1:
