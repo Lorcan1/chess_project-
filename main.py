@@ -14,9 +14,7 @@ bob = []
 #move log - see 2 
 #sometimes after one player moves it gets stuck. (if you click too many times)
 	#after player whos turn it isnt tries to take? not limited to this
-
-#king gets extra move when taking checking piece 
-
+#change other move functions to reflect bishops
 
 def load_images():
 	temp = {}
@@ -45,6 +43,8 @@ def main():
 	chess_board = starting_position(chess_board)
 	en_Passant = []
 	valid_moves = resolve_checks(chess_board,en_Passant)
+	print('moves') #both sides moves are appearing 
+	print(len(valid_moves))
 
 	move_made = False #dont generate moves untill gamestate changes 
 	images = load_images()
@@ -67,14 +67,14 @@ def main():
 						pass
 					else:
 						if (white_to_move is True and chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in white_pieces) or (white_to_move is False and 
-							chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in black_pieces):
+							chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in black_pieces): #correct pieces are moved
 							for item in valid_moves:
 								if item[0] == (int(sqs_clicked[0][0]),int(sqs_clicked[0][1])) and item[1] == (int(sqs_clicked[1][0]),int(sqs_clicked[1][1])):
 									chess_board, enPassant = move_piece(sqs_clicked[0], sqs_clicked[1], chess_board,en_Passant)
 									move_made = True
 									white_to_move =  not white_to_move
 									print('Whites Move') if white_to_move is True else print('Blacks Move')
-									break
+									break #added so king didnt get two moves when breaking a check
 								else: 
 									pass
 							display_image(images, window, chess_board)
@@ -87,16 +87,16 @@ def main():
 					pass
 		if move_made:
 			valid_moves = resolve_checks(chess_board,enPassant)
-			# print(valid_moves)
-			# if len(valid_moves) != 0:
-			# 	pass
-			# else:
-			# 	print('Checkmate')
-			# 	if white_to_move is True:
-			# 		print('White Wins')
-			# 	else:
-			# 		print('Black Wins')
-			# 	running = False
+
+			if len(valid_moves) == 0 : #works for pieces with one piece defending the checker 
+				print('Checkmate')
+				if white_to_move is False: #changed above 
+					print('White Wins')
+				else:
+					print('Black Wins')
+				running = False
+			else:
+				pass
 
 		draw_board(window)
 		display_image(images,window,chess_board)
@@ -107,7 +107,6 @@ def main():
 def get_all_moves(board,pins,en_Passant): 
 	counter = 0
 	moves = []
-	hard_moves = [[(6,4),(4,4)]]
 	for i in range(len(board)):
 		for j in range(len(board[i])):
 
@@ -171,14 +170,14 @@ def get_valid_moves(board, x=0,y=0):
 					if white_to_move is False and board[row][column] is 0 or white_to_move is True and board[row][column] is 0:
 						pass
 
-					elif white_to_move is False and board[row][column] in black_pieces or white_to_move is True and board[row][column] in white_pieces: #if black piece next king ally counter is one 
+					elif white_to_move is False and board[row][column] in black_pieces or white_to_move is True and board[row][column] in white_pieces: 
 						ally_counter = ally_counter + 1
 						if possible_pin == ():
 							possible_pin = (row,column,direction[0],direction[1])
 						else:
 							break
 
-					elif white_to_move is False and board[row][column] in white_pieces or white_to_move is True and board[row][column] in black_pieces: # if white piece, and 
+					elif white_to_move is False and board[row][column] in white_pieces or white_to_move is True and board[row][column] in black_pieces: 
 						enemy_counter = enemy_counter + 1 
 						if (i == 1) and ((board[row][column] == 1 and (6<=j<=7)) or (board[row][column] == 7 and (4<=j<=5))):
 							if ally_counter == 0: # add conditions in which pawn is checking king
@@ -218,6 +217,9 @@ def resolve_checks(board,en_Passant):
 	checks, pins,king_row,king_col = get_valid_moves(board)
 	moves = get_all_moves(board,pins,en_Passant)
 	valid_squares = []
+	# print('moves') #both sides moves are appearing 
+	# print(len(moves))
+	# print(white_to_move)
 
 	if len(checks) == 0:
 		return moves #minus pins which are calculated in individual move functions eg pawn_moves 
@@ -234,8 +236,15 @@ def resolve_checks(board,en_Passant):
 				valid_squares.append(valid_square)
 				if valid_square == (check_row,check_col):
 					break
+		print('Valid')
+		print(valid_squares)
 
 		moves = [move for move in moves if move[1] in valid_squares]
+		print('moves')
+		print(moves)
+
+		print('Turn')
+		print(white_to_move)
 
 		moves = king_moves(moves,king_row,king_col,board)
 				
@@ -379,6 +388,7 @@ def pawn_moves(moves,r,c,board,pins,en_Passant): #add take functionality
 			moves.append([(r,c),(r+1,c-1)])
 		elif white_to_move is False and  r == 4 and (r,c+1) in en_Passant: 
 			moves.append([(r,c),(r+1,c+1)])
+
 	return moves
 
 def knight_moves(moves,r,c,board,pins): #could be done in one for loop
@@ -410,7 +420,7 @@ def knight_moves(moves,r,c,board,pins): #could be done in one for loop
 					moves.remove(i)
 			elif white_to_move is False and  board[i[0][0]][i[0][1]] == 8 and board[i[1][0]][i[1][1]] in black_pieces:
 					moves.remove(i)	
-					print(i)
+					# print(i)
 			else:
 				pass
 	else:
@@ -449,18 +459,17 @@ def bishop_moves(moves,r,c,board,pins): #remove() doesnt work because it only re
 def get_diagonal_moves(moves,r,c,x,y,board,stopper):	
 	temp_list = [r,c,x,y]
 	if stopper and all(i >= 0 and i <=7 for i in temp_list):
-		if (white_to_move is True) and (board[r][c] == 3 or board[r][c] == 5) and (board[x][y] in white_pieces):
-			pass
-		elif white_to_move is True:
-			moves.append([(r,c),(x,y)])
-		else:
-			pass
-		if (white_to_move is False) and (board[r][c] == 9 or board[r][c] == 11) and (board[x][y] in black_pieces):
-			pass
-		elif white_to_move is False:
-			moves.append([(r,c),(x,y)])
-		else:
-			pass
+		if (board[r][c] == 3 or board[r][c] == 5):
+			if board[x][y] not in white_pieces:
+				moves.append([(r,c),(x,y)])
+			else:
+				pass
+		if (board[r][c] == 9 or board[r][c] == 11):
+			if board[x][y] not in black_pieces:
+				moves.append([(r,c),(x,y)])
+			else:
+				pass
+
 		if board[x][y] != 0:
 			stopper = False
 	return moves, stopper
@@ -496,18 +505,14 @@ def rook_moves(moves,r,c,board,pins):
 def get_orthogonal_moves(moves,r,c,x,y,board,stopper):	
 	temp_list = [r,c,x,y]
 	if stopper and all(i >= 0 and i <=7 for i in temp_list):
-		if(white_to_move is True) and (board[r][c] == 4 or board[r][c] == 5) and (board[x][y] in white_pieces):
+		if (board[r][c] == 4 or board[r][c] == 5) and (board[x][y] in white_pieces):
 			pass
-		elif white_to_move is True:
-			moves.append([(r,c),(x,y)])
 		else:
-			pass
-		if (white_to_move is False) and (board[r][c] == 10 or board[r][c] == 11) and (board[x][y] in black_pieces):
-			pass
-		elif white_to_move is False:
 			moves.append([(r,c),(x,y)])
-		else:
+		if (board[r][c] == 10 or board[r][c] == 11) and (board[x][y] in black_pieces):
 			pass
+		else: 
+			moves.append([(r,c),(x,y)])
 		if board[x][y] != 0:
 			stopper = False
 	return moves, stopper
