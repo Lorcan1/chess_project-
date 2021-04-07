@@ -392,7 +392,6 @@ def pawn_moves(moves,r,c,board,pins,en_Passant): #add take functionality
 	return moves
 
 def knight_moves(moves,r,c,board,pins): #could be done in one for loop
-
 	if len(pins) == 0:
 		piecePinned = False 
 	else:
@@ -405,27 +404,25 @@ def knight_moves(moves,r,c,board,pins): #could be done in one for loop
 	if piecePinned is False:
 		x = 2
 		y = 1
-		moves.extend([[(r,c),(r+x, c-y)],
-		[(r,c),(r-y, c+x)],
-		[(r,c),(r-x, c-y)],
-		[(r,c),(r+x, c+y)],
-		[(r,c),(r+y, c+x)],
-		[(r,c),(r-y, c-x)],
-		[(r,c),(r+y,c-x)],   
-		[(r,c),(r-x,c+y)]])
-		moves = [i for i in moves if i[1][0] >=0 and i[1][0] <= 7 and i[1][1] >=0 and i[1][1] <= 7 ]
-		for i in moves:
-			if (white_to_move is True) and (board[i[0][0]][i[0][1]] == 2) and (board[i[1][0]][i[1][1]] in white_pieces):
-					
-					moves.remove(i)
-			elif white_to_move is False and  board[i[0][0]][i[0][1]] == 8 and board[i[1][0]][i[1][1]] in black_pieces:
-					moves.remove(i)	
-					# print(i)
+		k_moves = [(r-y, c+x),(r-x, c-y),(r+x, c+y),(r+y, c+x),(r-y, c-x),(r+y,c-x),(r-x,c+y),(r+x,c-y) ]
+		for x in k_moves:
+			moves = knight_mover(moves,r,c,x[0],x[1],board)
+	return moves 
+
+def knight_mover(moves,r,c,x,y,board):
+	temp_list = [r,c,x,y]
+	if all(i >= 0 and i <=7 for i in temp_list):
+		if (board[r][c] == 2):
+			if board[x][y] not in white_pieces:
+				moves.append([(r,c),(x,y)])
 			else:
 				pass
-	else:
-		pass	
-	return moves 
+		if (board[r][c] == 8):
+			if board[x][y] not in black_pieces:
+				moves.append([(r,c),(x,y)])
+			else:
+				pass
+	return moves
 
 def bishop_moves(moves,r,c,board,pins): #remove() doesnt work because it only removes first instance from list 
 
@@ -505,14 +502,17 @@ def rook_moves(moves,r,c,board,pins):
 def get_orthogonal_moves(moves,r,c,x,y,board,stopper):	
 	temp_list = [r,c,x,y]
 	if stopper and all(i >= 0 and i <=7 for i in temp_list):
-		if (board[r][c] == 4 or board[r][c] == 5) and (board[x][y] in white_pieces):
-			pass
-		else:
-			moves.append([(r,c),(x,y)])
-		if (board[r][c] == 10 or board[r][c] == 11) and (board[x][y] in black_pieces):
-			pass
-		else: 
-			moves.append([(r,c),(x,y)])
+		if (board[r][c] == 4 or board[r][c] == 5):
+			if board[x][y] not in white_pieces:
+				moves.append([(r,c),(x,y)])
+			else:
+				pass
+		if (board[r][c] == 10 or board[r][c] == 11):
+			if board[x][y] not in black_pieces:
+				moves.append([(r,c),(x,y)])
+			else:
+				pass
+
 		if board[x][y] != 0:
 			stopper = False
 	return moves, stopper
