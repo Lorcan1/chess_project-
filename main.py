@@ -54,6 +54,7 @@ def main():
 	running = True
 	sq_clicked = ()
 	sqs_clicked = []
+	move_log = []
 	
 	while running:
 		for e in p.event.get():
@@ -77,6 +78,8 @@ def main():
 									move_made = True
 									white_to_move =  not white_to_move
 									print('Whites Move') if white_to_move is True else print('Blacks Move')
+									move_log.append(item)
+									print(move_log)
 									break #added so king didnt get two moves when breaking a check
 								else: 
 									pass
@@ -89,11 +92,12 @@ def main():
 					pass
 		if move_made:
 			valid_moves,checks = resolve_checks(chess_board,enPassant)
+			valid_moves = castling(valid_moves,move_log,chess_board,checks)
 #			print(valid_moves)
-			if len(valid_moves) == 0 : #works for pieces with one piece defending the checker 
+			if len(valid_moves) == 0 : 
 				if len(checks) != 0:
 					print('Checkmate')
-					if white_to_move is False: #changed above 
+					if white_to_move is False: 
 						print('White Wins')
 					else:
 						print('Black Wins')
@@ -108,6 +112,75 @@ def main():
 		clock.tick(15)
 		p.display.flip()	
 	return
+
+def castling(moves,move_log,board,checks):
+	global white_to_move
+	white_left = False
+	white_right = False
+	black_left = True
+	black_right = True
+	for move in move_log:
+		if white_to_move is True:
+			if move[0] == (7,4):
+				return moves
+			elif len(checks) != 0:
+				return moves
+			else: 
+				for move in move_log:
+					if move[0] == (7,0):
+					 	white_left = True
+					 	break
+					else:
+						pass
+					if move[0] ==(7,7):
+						white_right = True
+						break
+					else:
+						pass
+		if white_to_move is False:
+			if move[0] == (0,4):
+				return moves
+			elif len(checks) != 0:
+				return moves
+			else: 
+				for move in move_log:
+					if move[0] == (0,0):
+					 	black_left = True
+					 	break
+					else:
+						pass
+					if move[0] ==(0,7):
+						black_right = True
+						break
+					else:
+						pass
+
+	if white_left is False and board[7][1] ==0 and board[7][2] ==0 and board[7][3] ==0:
+		checks, pins, king_row, king_col = get_valid_moves(board,7,1)
+		checks1,pins, king_row, king_col = get_valid_moves(board,7,2)
+		if len(checks) == 0 and len(checks1) == 0:
+				 moves.append([(7,4),(7,2)])
+	elif white_right is False and board[7][5] == 0 and board[7][6] ==0:
+		checks2, pins, king_row, king_col = get_valid_moves(board,7,5)
+		checks3,pins, king_row, king_col = get_valid_moves(board,7,6)
+		if len(checks2) == 0 and len(checks3) == 0:
+			moves.append([(7,4),(7,6)])
+
+	if black_left is False and board[0][1] ==0 and board[0][2] ==0 and board[0][3] ==0:
+		checks, pins, king_row, king_col = get_valid_moves(board,0,1)
+		checks1,pins, king_row, king_col = get_valid_moves(board,0,2)
+		if len(checks) == 0 and len(checks1) == 0:
+				 moves.append([(0,4),(0,2)])
+	elif white_right is False and board[0][5] == 0 and board[0][6] ==0:
+		checks2, pins, king_row, king_col = get_valid_moves(board,0,5)
+		checks3,pins, king_row, king_col = get_valid_moves(board,0,6)
+		if len(checks2) == 0 and len(checks3) == 0:
+			moves.append([(0,4),(0,6)])
+
+
+	return moves
+
+
 
 def get_all_moves(board,pins,en_Passant): 
 	counter = 0
