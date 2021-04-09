@@ -321,6 +321,7 @@ def move_piece(old_square, new_square, board,en_Passant):
 	old_row, old_col,new_row,new_col  = int(old_row), int(old_col),int(new_row),int(new_col)
 	board = en_passant_take(old_row, old_col,new_row, new_col,en_p,board)
 	en_Passant = check_en_Passant(old_row, old_col,new_row,new_col,board) 
+	board = check_castle(old_row,old_col,new_row,new_col,board)
 	board = check_promotion(old_row,old_col,new_row,new_col,board)
 	
 	en_p = en_Passant
@@ -330,7 +331,7 @@ def move_piece(old_square, new_square, board,en_Passant):
 		pass
 	else:
 		temp = int(temp)
-		board[new_row:new_row+1, new_col:new_col+1] = temp
+		board[new_row:new_row+1, new_col:new_col+1] = temp 
 		board[old_row:old_row+1, old_col:old_col+1] = 0
 	return board, en_Passant
 
@@ -368,6 +369,27 @@ def check_promotion(old_r,old_c,r,c,board):
 
 	return board
 
+def check_castle(old_r,old_c,r,c,board):
+	if old_r == 7 and old_c == 4:
+		if r == 7 and c == 2:
+			board[7][0] = 0
+			board[7][3] = 4
+		elif r == 7 and c == 6:
+			print('heyy')
+			board[7][7] = 0
+			board[7][5] = 4
+		else:
+			pass
+	elif old_r ==0 and old_c ==4:
+		if r == 0 and c == 2:
+			board[0][0] = 0
+			board[0][3] = 10
+		elif r == 0 and c == 6:
+			board[0][7] = 0
+			board[0][5] = 10
+		else:
+			pass
+	return board
 
 def draw_board(window): #some of this should go in main 
 	colour1 = (235, 235, 208)
