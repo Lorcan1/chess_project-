@@ -23,30 +23,46 @@ def load_images():
 	pieces = ['wP','wN','wB','wR','wQ','wK','bP','bN','bB','bR','bQ','bK']
 	for piece in pieces:
 		temp[piece] = p.image.load('images/' + piece + '.png')
-
 	ini_list = range(1, 13)
 	images = dict(zip(ini_list, list(temp.values())))
 	return images
 
-def starting_position(chess_board):
-	chess_board[0,] = [10,8,9,11,12,9,8,10]
-	chess_board[1] = 7
-	chess_board[-2] = 1
-	chess_board[-1,] = [4,2,3,5,6,3,2,4]
-	# chess_board[0] = [0,0,0,0,12,0,0,0]
-	# chess_board[1] = [0,0,0,0,0,11,11,0]
-	# chess_board[-2] = [0,0,0,0,0,0,0,1]
-	# chess_board[-1] = [0,0,0,0,6,0,0,0]
-	return chess_board
-	
+def read_fen(): 
+	global white_to_move
+
+	board = np.array([[0 for x in range(8)] for y in range(8)])
+	fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+	d = {'P': 1,'N' : 2,'B' : 3,'R' : 4,'Q' : 5,'K' : 6,'p' : 7,'n' : 8,'b' : 9,'r' : 10,'q' : 11,'k' : 12}
+
+	rank = 0
+	file = 0 
+
+	for char in fen:
+		if char.isdigit() is True:
+			rank += int(char)
+		elif char == '/':
+			file += 1 
+			rank = 0
+		elif char in d.keys():
+			board[file][rank] = d.get(char)
+			rank += 1
+		elif char == ' '
+			if (fen[fen.index(char) + 1]) == 'w':
+					white_to_move = True 
+					break
+			elif (fen[fen.index(char)+1])== 'b':
+					white_to_move = False 
+					break
+	return board, white_to_move
+
 def main():
 	global white_to_move
 	p.init()
 	window = p.display.set_mode((WIDTH, HEIGHT))
 	clock = p.time.Clock()
 	window.fill((255, 255, 255))
-	chess_board = np.array([[0 for x in range(8)] for y in range(8)])
-	chess_board = starting_position(chess_board)
+	chess_board , white_to_move = read_fen()
 	en_Passant = []
 	valid_moves, checks = resolve_checks(chess_board,en_Passant)
 	move_made = False #dont generate moves untill gamestate changes 
@@ -55,6 +71,7 @@ def main():
 	sq_clicked = ()
 	sqs_clicked = []
 	move_log = []
+	
 	
 	while running:
 		for e in p.event.get():
@@ -211,10 +228,10 @@ def get_all_moves(board,pins,en_Passant):
 def get_king_location(board):
 	for i in range(len(board)):
 		for j in range(len(board[i])):
-			if white_to_move is True and board[i][j] == 6:
+			if (white_to_move is True) and (board[i][j] == 6):
 				king_row = i
 				king_col = j
-			elif white_to_move is False and board[i][j] == 12: #get all king moves 
+			elif (white_to_move is False) and (board[i][j] == 12): #get all king moves 
 				king_row = i
 				king_col = j
 	return king_row,king_col
@@ -375,7 +392,6 @@ def check_castle(old_r,old_c,r,c,board):
 			board[7][0] = 0
 			board[7][3] = 4
 		elif r == 7 and c == 6:
-			print('heyy')
 			board[7][7] = 0
 			board[7][5] = 4
 		else:
