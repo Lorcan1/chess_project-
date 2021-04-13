@@ -15,6 +15,7 @@ en_p = []
 #sometimes after one player moves it gets stuck. (if you click too many times)
 	#after player whos turn it isnt tries to take? not limited to this
 #Ruby on rails
+#push me please
 
 def load_images():
 	temp = {}
