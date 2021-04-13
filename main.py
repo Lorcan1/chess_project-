@@ -14,8 +14,6 @@ en_p = []
 #move log - see 2 
 #sometimes after one player moves it gets stuck. (if you click too many times)
 	#after player whos turn it isnt tries to take? not limited to this
-
-#Lem 
 #Ruby on rails
 
 def load_images():
@@ -35,19 +33,19 @@ def read_fen():
 
 	d = {'P': 1,'N' : 2,'B' : 3,'R' : 4,'Q' : 5,'K' : 6,'p' : 7,'n' : 8,'b' : 9,'r' : 10,'q' : 11,'k' : 12}
 
-	rank = 0
-	file = 0 
+	rank = 0 #row
+	file = 0 #column
 
 	for char in fen:
 		if char.isdigit() is True:
-			rank += int(char)
+			file += int(char)
 		elif char == '/':
-			file += 1 
-			rank = 0
+			rank += 1 
+			file = 0
 		elif char in d.keys():
-			board[file][rank] = d.get(char)
-			rank += 1
-		elif char == ' '
+			board[rank][file] = d.get(char)
+			file += 1
+		elif char == ' ':
 			if (fen[fen.index(char) + 1]) == 'w':
 					white_to_move = True 
 					break
@@ -71,7 +69,6 @@ def main():
 	sq_clicked = ()
 	sqs_clicked = []
 	move_log = []
-	
 	
 	while running:
 		for e in p.event.get():
@@ -125,10 +122,26 @@ def main():
 			else:
 				pass
 		draw_board(window)
+		highlight_squares(window,chess_board, valid_moves, sq_clicked)
 		display_image(images,window,chess_board)
 		clock.tick(15)
 		p.display.flip()	
 	return
+
+def highlight_squares(window,board, valid_moves, sq_clicked):
+	if sq_clicked != ():
+		r,c = sq_clicked
+		r,c = int(r),int(c)
+		if (board[r][c] in white_pieces and white_to_move is True) or (board[r][c] in black_pieces and white_to_move is False):
+				s = p.Surface((SQ_SIZE,SQ_SIZE))
+				s.set_alpha(100)
+				s.fill(p.Color('yellow'))
+				window.blit(s,(c*SQ_SIZE,r*SQ_SIZE))
+				s.fill(p.Color('red'))
+				for move in valid_moves:
+					if (move[0][0] == r) and (move[0][1] == c):
+						window.blit(s,(move[1][1]*SQ_SIZE,move[1][0]*SQ_SIZE))
+	return 
 
 def castling(moves,move_log,board,checks):
 	global white_to_move
@@ -194,10 +207,7 @@ def castling(moves,move_log,board,checks):
 		if len(checks2) == 0 and len(checks3) == 0:
 			moves.append([(0,4),(0,6)])
 
-
 	return moves
-
-
 
 def get_all_moves(board,pins,en_Passant): 
 	counter = 0
@@ -383,7 +393,6 @@ def check_promotion(old_r,old_c,r,c,board):
 		board[old_r][old_c] = 11
 	else:
 		pass
-
 	return board
 
 def check_castle(old_r,old_c,r,c,board):
