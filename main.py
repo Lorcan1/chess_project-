@@ -1,6 +1,9 @@
 import numpy as np 
 import pygame as p
 
+from move_finder import find_random_move
+
+
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT/DIMENSION
@@ -70,41 +73,54 @@ def main():
 	sq_clicked = ()
 	sqs_clicked = []
 	move_log = []
+	player_one = True #human is true, ai is false, for the white pieces
+	player_two = False #same as above but for black pieces. (could change to integer for different strength ai)
 	
 	while running:
+		human_turn = (white_to_move is True and player_one) or (not white_to_move and player_two)
 		for e in p.event.get():
 			if e.type == p.QUIT:
 				running = False
 			elif e.type == p.MOUSEBUTTONDOWN:
-				location = p.mouse.get_pos()
-				col = location[0]//SQ_SIZE 
-				row = location[1]//SQ_SIZE
-				sq_clicked = (row,col)
-				sqs_clicked.append(sq_clicked)
-				if len(sqs_clicked) == 2:
-					if sqs_clicked[0] == sqs_clicked[1]: #if user clicks same square
-						pass
-					else:
-						if (white_to_move is True and chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in white_pieces) or (white_to_move is False and 
-							chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in black_pieces): #correct pieces are moved
-							for item in valid_moves:
-								if item[0] == (int(sqs_clicked[0][0]),int(sqs_clicked[0][1])) and item[1] == (int(sqs_clicked[1][0]),int(sqs_clicked[1][1])):
-									chess_board, enPassant = move_piece(sqs_clicked[0], sqs_clicked[1], chess_board,en_Passant)
-									move_made = True
-									white_to_move =  not white_to_move
-									print('Whites Move') if white_to_move is True else print('Blacks Move')
-									move_log.append(item)
-									print(move_log)
-									break #added so king didnt get two moves when breaking a check
-								else: 
-									pass
-							display_image(images, window, chess_board)
-						else:
+				if human_turn:
+					location = p.mouse.get_pos()
+					col = location[0]//SQ_SIZE 
+					row = location[1]//SQ_SIZE
+					sq_clicked = (row,col)
+					sqs_clicked.append(sq_clicked)
+					if len(sqs_clicked) == 2:
+						if sqs_clicked[0] == sqs_clicked[1]: #if user clicks same square
 							pass
-					sq_clicked = ()
-					sqs_clicked = []
-				else:
-					pass
+						else:
+							if (white_to_move is True and chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in white_pieces) or (white_to_move is False and 
+								chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in black_pieces): #correct pieces are moved
+								for item in valid_moves:
+									if item[0] == (int(sqs_clicked[0][0]),int(sqs_clicked[0][1])) and item[1] == (int(sqs_clicked[1][0]),int(sqs_clicked[1][1])):
+										chess_board, enPassant = move_piece(sqs_clicked[0], sqs_clicked[1], chess_board,en_Passant)
+										move_made = True
+										white_to_move =  not white_to_move
+										print('Whites Move') if white_to_move is True else print('Blacks Move')
+										move_log.append(item)
+										print(move_log)
+										break #added so king didnt get two moves when breaking a check
+									else: 
+										pass
+								display_image(images, window, chess_board)
+							else:
+								pass
+						sq_clicked = ()
+						sqs_clicked = []
+					else:
+						pass
+
+		if not human_turn:
+			ai_move = find_random_move(valid_moves)
+			chess_board, enPassant = move_piece(ai_move[0], ai_move[1], chess_board,en_Passant)
+			move_made = True
+			white_to_move =  not white_to_move
+			move_log.append(ai_move)
+
+
 		if move_made:
 			valid_moves,checks = resolve_checks(chess_board,enPassant)
 			valid_moves = castling(valid_moves,move_log,chess_board,checks)
@@ -432,6 +448,18 @@ def display_image(images, window,chess_board):
 	      	piece = chess_board[i][j]
 	      	if piece != 0:
 		      	window.blit(images[piece], p.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+# def animate_move(move,window,board,clock): #to finish later
+# 	coords = []
+# 	dr = move[1][0] - move[0][0] #row distance (end row - end column)
+# 	dc = move[1][1] - move[0][1] 
+# 	frames_per_square = 20
+# 	frame_count = abs(dr) + abs(dc)* frames_per_square
+
+# 	for frame in range(frame_count +1):
+# 		r,c = (move[0][0]+ dr*frame/frames_count,move[0][1]+  dc*frame/frame_count)
+# 		draw_board(window)
+
 
 def pawn_moves(moves,r,c,board,pins,en_Passant): #add take functionality
 
