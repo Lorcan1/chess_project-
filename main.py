@@ -1,15 +1,12 @@
 import numpy as np 
 import pygame as p
-import pawn_moves,knight_moves,bishop_moves,rook_moves,move_finder
+import pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,move_finder
 import player_turn
 
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT/DIMENSION
 en_p = []
-
-# TO DO
-# draws arent accounted for 
 
 def load_images():
 	temp = {}
@@ -54,7 +51,7 @@ def main():
 	window.fill((255, 255, 255))
 	chess_board , player_turn.white_to_move = read_fen()
 	en_Passant = []
-	valid_moves, checks = resolve_checks(chess_board,en_Passant)
+	v_moves, checks = resolve_checks(chess_board,en_Passant)
 	move_made = False #dont generate moves untill gamestate changes 
 	images = load_images()
 	running = True
@@ -82,7 +79,7 @@ def main():
 						else:
 							if (player_turn.white_to_move is True and chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in player_turn.white_pieces) or (player_turn.white_to_move is False and 
 								chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in player_turn.black_pieces): #correct pieces are moved
-								for item in valid_moves:
+								for item in v_moves:
 									if item[0] == (int(sqs_clicked[0][0]),int(sqs_clicked[0][1])) and item[1] == (int(sqs_clicked[1][0]),int(sqs_clicked[1][1])):
 										chess_board, enPassant = move_piece(sqs_clicked[0], sqs_clicked[1], chess_board,en_Passant)
 										move_made = True
@@ -102,8 +99,8 @@ def main():
 						pass
 
 		if not human_turn:
-			ai_move = move_finder.find_random_move(valid_moves)
-			# ai_move = move_finder.find_best_move(chess_board, valid_moves)
+			ai_move = move_finder.find_random_move(v_moves)
+			# ai_move = move_finder.find_best_move(chess_board, v_moves)
 			chess_board, enPassant = move_piece(ai_move[0], ai_move[1], chess_board,en_Passant)
 			move_made = True
 			player_turn.white_to_move =  not player_turn.white_to_move
@@ -111,10 +108,9 @@ def main():
 
 
 		if move_made:
-			valid_moves,checks = resolve_checks(chess_board,enPassant)
-			valid_moves = castling(valid_moves,move_log,chess_board,checks)
-#			print(valid_moves)
-			if len(valid_moves) == 0 : 
+			v_moves,checks = resolve_checks(chess_board,enPassant)
+			v_moves = castle.castling(v_moves,move_log,chess_board,checks)
+			if len(v_moves) == 0 : 
 				if len(checks) != 0:
 					print('Checkmate')
 					if player_turn.white_to_move is False: 
@@ -128,13 +124,13 @@ def main():
 			else:
 				pass
 		draw_board(window)
-		highlight_squares(window,chess_board, valid_moves, sq_clicked)
+		highlight_squares(window,chess_board, v_moves, sq_clicked)
 		display_image(images,window,chess_board)
 		clock.tick(15)
 		p.display.flip()	
 	return
 
-def highlight_squares(window,board, valid_moves, sq_clicked):
+def highlight_squares(window,board, moves, sq_clicked):
 	if sq_clicked != ():
 		r,c = sq_clicked
 		r,c = int(r),int(c)
@@ -144,76 +140,10 @@ def highlight_squares(window,board, valid_moves, sq_clicked):
 				s.fill(p.Color('yellow'))
 				window.blit(s,(c*SQ_SIZE,r*SQ_SIZE))
 				s.fill(p.Color('red'))
-				for move in valid_moves:
+				for move in moves:
 					if (move[0][0] == r) and (move[0][1] == c):
 						window.blit(s,(move[1][1]*SQ_SIZE,move[1][0]*SQ_SIZE))
 	return 
-
-def castling(moves,move_log,board,checks):
-#	global player_turn.white_to_move
-	white_left = False
-	white_right = False
-	black_left = True
-	black_right = True
-	for move in move_log:
-		if player_turn.white_to_move is True:
-			if move[0] == (7,4):
-				return moves
-			elif len(checks) != 0:
-				return moves
-			else: 
-				for move in move_log:
-					if move[0] == (7,0):
-					 	white_left = True
-					 	break
-					else:
-						pass
-					if move[0] ==(7,7):
-						white_right = True
-						break
-					else:
-						pass
-		if player_turn.white_to_move is False:
-			if move[0] == (0,4):
-				return moves
-			elif len(checks) != 0:
-				return moves
-			else: 
-				for move in move_log:
-					if move[0] == (0,0):
-					 	black_left = True
-					 	break
-					else:
-						pass
-					if move[0] ==(0,7):
-						black_right = True
-						break
-					else:
-						pass
-
-	if white_left is False and board[7][1] ==0 and board[7][2] ==0 and board[7][3] ==0:
-		checks, pins, king_row, king_col = get_valid_moves(board,7,1)
-		checks1,pins, king_row, king_col = get_valid_moves(board,7,2)
-		if len(checks) == 0 and len(checks1) == 0:
-				 moves.append([(7,4),(7,2)])
-	elif white_right is False and board[7][5] == 0 and board[7][6] ==0:
-		checks2, pins, king_row, king_col = get_valid_moves(board,7,5)
-		checks3,pins, king_row, king_col = get_valid_moves(board,7,6)
-		if len(checks2) == 0 and len(checks3) == 0:
-			moves.append([(7,4),(7,6)])
-
-	if black_left is False and board[0][1] ==0 and board[0][2] ==0 and board[0][3] ==0:
-		checks, pins, king_row, king_col = get_valid_moves(board,0,1)
-		checks1,pins, king_row, king_col = get_valid_moves(board,0,2)
-		if len(checks) == 0 and len(checks1) == 0:
-				 moves.append([(0,4),(0,2)])
-	elif white_right is False and board[0][5] == 0 and board[0][6] ==0:
-		checks2, pins, king_row, king_col = get_valid_moves(board,0,5)
-		checks3,pins, king_row, king_col = get_valid_moves(board,0,6)
-		if len(checks2) == 0 and len(checks3) == 0:
-			moves.append([(0,4),(0,6)])
-
-	return moves
 
 def get_all_moves(board,pins,en_Passant): 
 	counter = 0
@@ -237,94 +167,12 @@ def get_all_moves(board,pins,en_Passant):
 				moves = bishop_moves.b_moves(moves,i,j,board,pins)
 				pass
 			elif board[i][j] == 6 or board[i][j] == 12: #get all king moves 
-				moves = king_moves(moves,i,j,board)
+				moves = king_moves.k_moves(moves,i,j,board)
 				pass
 	return moves
 
-def get_king_location(board):
-	for i in range(len(board)):
-		for j in range(len(board[i])):
-			if (player_turn.white_to_move is True) and (board[i][j] == 6):
-				king_row = i
-				king_col = j
-			elif (player_turn.white_to_move is False) and (board[i][j] == 12): #get all king moves 
-				king_row = i
-				king_col = j
-	return king_row,king_col
-
-def get_valid_moves(board, x=100,y=0): 
-	directions = ((-1,0),(0,-1),(1,0),(0,1),(-1,-1),(-1,1),(1,-1),(1,1)) #up,down,left,right , four diagonals
-	checks = []
-	pins = []
-	if x == 100:
-		king_row,king_col = get_king_location(board)
-	else:
-		king_row = x
-		king_col = y
-	for j in range(len(directions)):
-		possible_pin = ()
-		direction = directions[j]
-		row = king_row
-		column = king_col
-		counter = 1
-		ally_counter = 0
-		enemy_counter = 0
-		for i in range(1,8):
-			row = king_row + (direction[0]*i)
-			column = king_col + (direction[1]*i)
-			if ally_counter <2 and enemy_counter < 1:	
-				if (0<=row<=7) and (0<=column<=7):
-					if board[row][column] == 0:
-						pass
-					elif (player_turn.white_to_move == False and board[row][column] in player_turn.black_pieces) or (player_turn.white_to_move == True and board[row][column] in player_turn.white_pieces): 
-						ally_counter = ally_counter + 1
-						if possible_pin == ():
-							possible_pin = (row,column,direction[0],direction[1])
-						else:
-							break
-					elif (player_turn.white_to_move == False and board[row][column] in player_turn.white_pieces) or (player_turn.white_to_move == True and board[row][column] in player_turn.black_pieces): 
-						enemy_counter = enemy_counter + 1 
-						if (i == 1) and ((board[row][column] == 1 and (6<=j<=7)) or (board[row][column] == 7 and (4<=j<=5))):
-							if ally_counter == 0: # add conditions in which pawn is checking king
-								checks.append((row,column,direction[0],direction[1]))
-							elif ally_counter == 1:
-								break
-						elif (4<=j<=7) and (board[row][column] == 3 or board[row][column] == 9):
-							if ally_counter == 0:
-								checks.append((row,column,direction[0],direction[1]))
-							elif ally_counter == 1:
-								pins.append(possible_pin)
-						elif (0<=j<=3) and (board[row][column] == 4 or board[row][column] == 10):
-							if ally_counter == 0:
-								checks.append((row,column,direction[0],direction[1]))
-							elif ally_counter == 1:
-								pins.append(possible_pin)
-						elif board[row][column] == 5 or board[row][column] == 11:
-							if ally_counter == 0:
-								checks.append((row,column,direction[0],direction[1]))
-							elif ally_counter == 1:
-								pins.append(possible_pin)
-						elif (i ==1) and (board[row][column] == 6 or board[row][column] == 12): 
-							if ally_counter == 0: # add conditions in which pawn is checking king
-								checks.append((row,column,direction[0],direction[1]))
-							elif ally_counter == 1:
-								break
-						else:
-							break
-			else:
-				break
-	knight_moves = [(-2,-1),(-1,-2),(-1,2),(-2,1),(2,-1),(1,-2),(1,2),(2,1)] #seperate loop needed for knight moves
-	for move in knight_moves:
-		if 0<= king_row+move[0] <=7 and 0<= king_col+move[1] <=7:
-			if board[king_row][king_col] == 12 and board[king_row+move[0]][king_col+move[1]] == 2: # and player_turn.white_to_move?
-				checks.append((king_row+move[0],king_col+move[1]))
-			elif board[king_row][king_col] == 6 and board[king_row+move[0]][king_col+move[1]] == 8:
-				checks.append((king_row+move[0],king_col+move[1]))
-	return checks,pins,king_row,king_col
-
-
 def resolve_checks(board,en_Passant): 
-	checks, pins,king_row,king_col = get_valid_moves(board)
+	checks, pins,king_row,king_col = valid_moves.get_valid_moves(board)
 	moves = get_all_moves(board,pins,en_Passant) 
 	valid_squares = []
 	if len(checks) == 0:
@@ -343,9 +191,9 @@ def resolve_checks(board,en_Passant):
 				if valid_square == (check_row,check_col):
 					break
 		moves = [move for move in moves if move[1] in valid_squares]  
-		moves = king_moves(moves,king_row,king_col,board)		
+		moves = king_moves.k_moves(moves,king_row,king_col,board)		
 	elif len(checks) == 2:
-		moves = king_moves(moves,king_row,king_col,board) 	
+		moves = king_moves.k_moves(moves,king_row,king_col,board) 	
 	return moves, checks
 
 def move_piece(old_square, new_square, board,en_Passant):
@@ -448,47 +296,6 @@ def display_image(images, window,chess_board):
 # 	for frame in range(frame_count +1):
 # 		r,c = (move[0][0]+ dr*frame/frames_count,move[0][1]+  dc*frame/frame_count)
 # 		draw_board(window)
-
-
-
-
-def king_moves(moves,r,c,board): #is a loop more efficient 
-	counter = 1
-	get_king_moves(moves,r,c,(r),(c + counter),board)
-	get_king_moves(moves,r,c,(r + counter), (c),board)
-	get_king_moves(moves,r,c,(r), (c- counter),board)
-	get_king_moves(moves,r,c,(r - counter), (c),board)
-	get_king_moves(moves,r,c,(r+counter),(c+counter),board)
-	get_king_moves(moves,r,c,(r-counter),(c-counter),board)
-	get_king_moves(moves,r,c,(r+counter),(c-counter),board)
-	get_king_moves(moves,r,c,(r-counter),(c+counter),board)
-	return moves
-
-def get_king_moves(moves,r,c,x,y,board):
-	if (0 <= x <= 7) and (0 <= y <= 7):
-		temp_board = board.copy()
-		if board[r][c] == 6:
-			temp_board[x][y] = 6
-			temp_board[r][c] = 0
-		elif board[r][c] ==12:
-			temp_board[x][y] =12
-			temp_board[r][c] = 0
-		checks, pins, king_row, king_col = get_valid_moves(temp_board,x,y)
-		if (len(checks) == 0) and  (board[r][c] == 6) and (player_turn.white_to_move is True):
-			if board[x][y] not in player_turn.white_pieces:
-				moves.append([(r,c),(x,y)])
-			else:
-				pass
-		else:
-			pass
-		if (len(checks) == 0) and (board[r][c] == 12) and (player_turn.white_to_move is False):
-			if board[x][y] not in player_turn.black_pieces:
-				moves.append([(r,c),(x,y)])
-			else:
-				pass
-		else:
-			pass
-	return moves
 
 if __name__ == "__main__" :
 	main()

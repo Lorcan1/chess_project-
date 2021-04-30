@@ -1,4 +1,3 @@
-from main import get_valid_moves
 import player_turn
 
 def k_moves(moves,r,c,board,pins): #could be done in one for loop
