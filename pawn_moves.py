@@ -3,7 +3,6 @@ import player_turn
 
 
 def p_moves(moves,r,c,board,pins,en_Passant): #add take functionality
-	print(player_turn.white_to_move)
 	if len(pins) == 0:
 		piecePinned = False 
 	else:

@@ -59,7 +59,7 @@ def main():
 	sqs_clicked = []
 	move_log = []
 	player_one = True #human is true, ai is false, for the white pieces
-	player_two = False #same as above but for black pieces. (could change to integer for different strength ai)
+	player_two = True #same as above but for black pieces. (could change to integer for different strength ai)
 	
 	while running:
 		human_turn = (player_turn.white_to_move is True and player_one) or (not player_turn.white_to_move and player_two)
@@ -97,6 +97,9 @@ def main():
 						sqs_clicked = []
 					else:
 						pass
+			elif e.type == p.KEYDOWN:
+				if e.key == p.K_z:
+					undo_move(move_log,chess_board)
 
 		if not human_turn:
 			ai_move = move_finder.find_random_move(v_moves)
@@ -208,13 +211,29 @@ def move_piece(old_square, new_square, board,en_Passant):
 	en_p = en_Passant
 
 	temp = board[old_row:old_row+1, old_col:old_col+1]
+	player_turn.taken_square.append(board[new_row][new_col])
 	if temp == 0: 
 		pass
 	else:
 		temp = int(temp)
 		board[new_row:new_row+1, new_col:new_col+1] = temp 
 		board[old_row:old_row+1, old_col:old_col+1] = 0
+
 	return board, en_Passant
+
+def undo_move(move_log,board):
+	# old_row,old_col,new_row,new_col = old_square[0], old_square[1],new_square[0],new_square[1]
+	# old_row, old_col,new_row,new_col  = int(old_row), int(old_col),int(new_row),int(new_col)
+
+	if len(move_log) !=0:
+		move = move_log.pop()
+		square = player_turn.taken_square.pop()
+		temp = board[move[1][0]][move[1][1]]
+		board[move[1][0]][move[1][1]] = square
+		board[move[0][0]][move[0][1]] = temp
+		player_turn.white_to_move = not player_turn.white_to_move
+		
+	return
 
 def check_en_Passant(old_row, old_col,new_row,new_col,board): #white to move logic here is null and void 
 	en_passant = []
