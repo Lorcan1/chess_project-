@@ -1,7 +1,6 @@
 import numpy as np 
 import pygame as p
-import player_turn
-import pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,piece_mover,move_finder
+import player_turn, pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,piece_mover,move_finder
 
 WIDTH = HEIGHT = 512
 DIMENSION = 8
@@ -177,6 +176,15 @@ def undo_move(move_log):
 		temp = player_turn.board[move[1][0]][move[1][1]]
 		player_turn.board[move[1][0]][move[1][1]] = square
 		player_turn.board[move[0][0]][move[0][1]] = temp
+		if player_turn.en_passant_bool:
+			if player_turn.white_to_move:
+				player_turn.board[(move[1][0]) -1][move[1][1]] = 1
+				player_turn.en_p.append((move[0][0],move[1][1]))
+			else:
+				player_turn.board[(move[1][0]) +1][move[1][1]] = 7
+				player_turn.en_p.append((move[0][0],move[1][1]))
+
+		player_turn.en_passant_bool = False
 		player_turn.white_to_move = not player_turn.white_to_move
 	return
 
