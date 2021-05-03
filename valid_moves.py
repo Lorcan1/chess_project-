@@ -1,22 +1,22 @@
 import player_turn
 
-def get_king_location(board):
-	for i in range(len(board)):
-		for j in range(len(board[i])):
-			if (player_turn.white_to_move is True) and (board[i][j] == 6):
+def get_king_location():
+	for i in range(len(player_turn.board)):
+		for j in range(len(player_turn.board[i])):
+			if (player_turn.white_to_move is True) and (player_turn.board[i][j] == 6):
 				king_row = i
 				king_col = j
-			elif (player_turn.white_to_move is False) and (board[i][j] == 12): #get all king moves 
+			elif (player_turn.white_to_move is False) and (player_turn.board[i][j] == 12): #get all king moves 
 				king_row = i
 				king_col = j
 	return king_row,king_col
 
-def get_valid_moves(board, x=100,y=0): 
+def get_valid_moves(board=player_turn.board,x=100,y=0): 
 	directions = ((-1,0),(0,-1),(1,0),(0,1),(-1,-1),(-1,1),(1,-1),(1,1)) #up,down,left,right , four diagonals
 	checks = []
 	pins = []
 	if x == 100:
-		king_row,king_col = get_king_location(board)
+		king_row,king_col = get_king_location()
 	else:
 		king_row = x
 		king_col = y

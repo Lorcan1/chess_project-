@@ -1,6 +1,6 @@
 import player_turn
 
-def b_moves(moves,r,c,board,pins): #remove() doesnt work because it only removes first instance from list 
+def b_moves(moves,r,c,pins): #remove() doesnt work because it only removes first instance from list 
 	if len(pins) == 0:
 		piecePinned = False 
 	else:
@@ -17,30 +17,30 @@ def b_moves(moves,r,c,board,pins): #remove() doesnt work because it only removes
 	stopper4 = True
 	while counter <8:
 		if stopper1 and (piecePinned == False or (d == (1,1) or d ==(-1,-1))):
-			moves,stopper1 = get_diagonal_moves(moves,r,c,r+counter,c+counter,board,stopper1)
+			moves,stopper1 = get_diagonal_moves(moves,r,c,r+counter,c+counter,stopper1)
 		if stopper2 and (piecePinned == False or (d == (-1,-1)or d ==(1,1))):
-			moves,stopper2 = get_diagonal_moves(moves,r,c,r-counter,c-counter,board,stopper2)
+			moves,stopper2 = get_diagonal_moves(moves,r,c,r-counter,c-counter,stopper2)
 		if stopper3 and (piecePinned == False or (d == (1,-1)or d ==(-1,1))):
-			moves,stopper3 = get_diagonal_moves(moves,r,c,r+counter,c-counter,board,stopper3)
+			moves,stopper3 = get_diagonal_moves(moves,r,c,r+counter,c-counter,stopper3)
 		if stopper4 and (piecePinned == False or (d == (-1,1)or d ==(1,-1))):
-			moves,stopper4 = get_diagonal_moves(moves,r,c,r-counter,c+counter,board,stopper4)
+			moves,stopper4 = get_diagonal_moves(moves,r,c,r-counter,c+counter,stopper4)
 		counter = counter + 1
 	return moves
 
-def get_diagonal_moves(moves,r,c,x,y,board,stopper):	
+def get_diagonal_moves(moves,r,c,x,y,stopper):	
 	temp_list = [r,c,x,y]
 	if stopper and all(i >= 0 and i <=7 for i in temp_list):
-		if (board[r][c] == 3 or board[r][c] == 5) and (player_turn.white_to_move is True):
-			if board[x][y] not in player_turn.white_pieces:
+		if (player_turn.board[r][c] == 3 or player_turn.board[r][c] == 5) and (player_turn.white_to_move is True):
+			if player_turn.board[x][y] not in player_turn.white_pieces:
 				moves.append([(r,c),(x,y)])
 			else:
 				pass
-		if (board[r][c] == 9 or board[r][c] == 11) and (player_turn.white_to_move is False):
-			if board[x][y] not in player_turn.black_pieces:
+		if (player_turn.board[r][c] == 9 or player_turn.board[r][c] == 11) and (player_turn.white_to_move is False):
+			if player_turn.board[x][y] not in player_turn.black_pieces:
 				moves.append([(r,c),(x,y)])
 			else:
 				pass
 
-		if board[x][y] != 0:
+		if player_turn.board[x][y] != 0:
 			stopper = False
 	return moves, stopper

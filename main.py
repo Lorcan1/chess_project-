@@ -1,12 +1,11 @@
 import numpy as np 
 import pygame as p
-import pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,move_finder
 import player_turn
+import pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,piece_mover,move_finder
 
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = HEIGHT/DIMENSION
-en_p = []
 
 def load_images():
 	temp = {}
@@ -17,41 +16,13 @@ def load_images():
 	images = dict(zip(ini_list, list(temp.values())))
 	return images
 
-def read_fen(): 
-	board = np.array([[0 for x in range(8)] for y in range(8)])
-	fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-
-	d = {'P': 1,'N' : 2,'B' : 3,'R' : 4,'Q' : 5,'K' : 6,'p' : 7,'n' : 8,'b' : 9,'r' : 10,'q' : 11,'k' : 12}
-
-	rank = 0 #row
-	file = 0 #column
-
-	for char in fen:
-		if char.isdigit() is True:
-			file += int(char)
-		elif char == '/':
-			rank += 1 
-			file = 0
-		elif char in d.keys():
-			board[rank][file] = d.get(char)
-			file += 1
-		elif char == ' ':
-			if (fen[fen.index(char) + 1]) == 'w':
-					player_turn.white_to_move = True 
-					break
-			elif (fen[fen.index(char)+1])== 'b':
-					player_turn.white_to_move = False 
-					break
-	return board, player_turn.white_to_move
-
 def main():
 	p.init()
 	window = p.display.set_mode((WIDTH, HEIGHT))
 	clock = p.time.Clock()
 	window.fill((255, 255, 255))
-	chess_board , player_turn.white_to_move = read_fen()
-	en_Passant = []
-	v_moves, checks = resolve_checks(chess_board,en_Passant)
+	player_turn.read_fen(player_turn.board)
+	v_moves, checks = resolve_checks()
 	move_made = False #dont generate moves untill gamestate changes 
 	images = load_images()
 	running = True
@@ -77,11 +48,11 @@ def main():
 						if sqs_clicked[0] == sqs_clicked[1]: #if user clicks same square
 							pass
 						else:
-							if (player_turn.white_to_move is True and chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in player_turn.white_pieces) or (player_turn.white_to_move is False and 
-								chess_board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in player_turn.black_pieces): #correct pieces are moved
+							if (player_turn.white_to_move is True and player_turn.board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in player_turn.white_pieces) or (player_turn.white_to_move is False and 
+								player_turn.board[int(sqs_clicked[0][0])][int(sqs_clicked[0][1])] in player_turn.black_pieces): #correct pieces are moved
 								for item in v_moves:
 									if item[0] == (int(sqs_clicked[0][0]),int(sqs_clicked[0][1])) and item[1] == (int(sqs_clicked[1][0]),int(sqs_clicked[1][1])):
-										chess_board, enPassant = move_piece(sqs_clicked[0], sqs_clicked[1], chess_board,en_Passant)
+										piece_mover.move_piece(sqs_clicked[0], sqs_clicked[1])
 										move_made = True
 										player_turn.white_to_move =  not player_turn.white_to_move
 										print('Whites Move') if player_turn.white_to_move is True else print('Blacks Move')
@@ -90,7 +61,7 @@ def main():
 										break #added so king didnt get two moves when breaking a check
 									else: 
 										pass
-								display_image(images, window, chess_board)
+								display_image(images, window)
 							else:
 								pass
 						sq_clicked = ()
@@ -99,20 +70,20 @@ def main():
 						pass
 			elif e.type == p.KEYDOWN:
 				if e.key == p.K_z:
-					undo_move(move_log,chess_board)
+					undo_move(move_log)
 
 		if not human_turn:
 			ai_move = move_finder.find_random_move(v_moves)
 			# ai_move = move_finder.find_best_move(chess_board, v_moves)
-			chess_board, enPassant = move_piece(ai_move[0], ai_move[1], chess_board,en_Passant)
+			piece_mover.move_piece(ai_move[0], ai_move[1], chess_board)
 			move_made = True
 			player_turn.white_to_move =  not player_turn.white_to_move
 			move_log.append(ai_move)
 
 
 		if move_made:
-			v_moves,checks = resolve_checks(chess_board,enPassant)
-			v_moves = castle.castling(v_moves,move_log,chess_board,checks)
+			v_moves,checks = resolve_checks()
+			v_moves = castle.castling(v_moves,move_log,checks)
 			if len(v_moves) == 0 : 
 				if len(checks) != 0:
 					print('Checkmate')
@@ -127,17 +98,17 @@ def main():
 			else:
 				pass
 		draw_board(window)
-		highlight_squares(window,chess_board, v_moves, sq_clicked)
-		display_image(images,window,chess_board)
+		highlight_squares(window, v_moves, sq_clicked)
+		display_image(images,window)
 		clock.tick(15)
 		p.display.flip()	
 	return
 
-def highlight_squares(window,board, moves, sq_clicked):
+def highlight_squares(window, moves, sq_clicked):
 	if sq_clicked != ():
 		r,c = sq_clicked
 		r,c = int(r),int(c)
-		if (board[r][c] in player_turn.white_pieces and player_turn.white_to_move is True) or (board[r][c] in player_turn.black_pieces and player_turn.white_to_move is False):
+		if (player_turn.board[r][c] in player_turn.white_pieces and player_turn.white_to_move is True) or (player_turn.board[r][c] in player_turn.black_pieces and player_turn.white_to_move is False):
 				s = p.Surface((SQ_SIZE,SQ_SIZE))
 				s.set_alpha(100)
 				s.fill(p.Color('yellow'))
@@ -148,35 +119,35 @@ def highlight_squares(window,board, moves, sq_clicked):
 						window.blit(s,(move[1][1]*SQ_SIZE,move[1][0]*SQ_SIZE))
 	return 
 
-def get_all_moves(board,pins,en_Passant): 
+def get_all_moves(pins): 
 	counter = 0
 	moves = []
-	for i in range(len(board)):
-		for j in range(len(board[i])):
-			if board[i][j] == 1 or board[i][j] == 7: #get all pawn moves
-				moves = pawn_moves.p_moves(moves, i,j,board,pins,en_Passant)
+	for i in range(len(player_turn.board)):
+		for j in range(len(player_turn.board[i])):
+			if player_turn.board[i][j] == 1 or player_turn.board[i][j] == 7: #get all pawn moves
+				moves = pawn_moves.p_moves(moves, i,j,pins)
 				pass
-			elif board[i][j] == 2 or board[i][j] == 8: #get all knight moves 
-				moves = knight_moves.k_moves(moves, i,j,board,pins)
+			elif player_turn.board[i][j] == 2 or player_turn.board[i][j] == 8: #get all knight moves 
+				moves = knight_moves.n_moves(moves, i,j,pins)
 				pass
-			elif board[i][j] == 3 or board[i][j] == 9: #get all bishop moves 
-				moves = bishop_moves.b_moves(moves,i,j,board,pins)
+			elif player_turn.board[i][j] == 3 or player_turn.board[i][j] == 9: #get all bishop moves 
+				moves = bishop_moves.b_moves(moves,i,j,pins)
 				pass
-			elif board[i][j] == 4 or board[i][j] == 10: #get all rook moves 
-				moves = rook_moves.r_moves(moves,i,j,board,pins)
+			elif player_turn.board[i][j] == 4 or player_turn.board[i][j] == 10: #get all rook moves 
+				moves = rook_moves.r_moves(moves,i,j,pins)
 				pass
-			elif board[i][j] == 5 or board[i][j] == 11: #get all queen moves 
-				moves = rook_moves.r_moves(moves,i,j,board,pins)
-				moves = bishop_moves.b_moves(moves,i,j,board,pins)
+			elif player_turn.board[i][j] == 5 or player_turn.board[i][j] == 11: #get all queen moves 
+				moves = rook_moves.r_moves(moves,i,j,pins)
+				moves = bishop_moves.b_moves(moves,i,j,pins)
 				pass
-			elif board[i][j] == 6 or board[i][j] == 12: #get all king moves 
-				moves = king_moves.k_moves(moves,i,j,board)
+			elif player_turn.board[i][j] == 6 or player_turn.board[i][j] == 12: #get all king moves 
+				moves = king_moves.k_moves(moves,i,j)
 				pass
 	return moves
 
-def resolve_checks(board,en_Passant): 
-	checks, pins,king_row,king_col = valid_moves.get_valid_moves(board)
-	moves = get_all_moves(board,pins,en_Passant) 
+def resolve_checks(): 
+	checks, pins,king_row,king_col = valid_moves.get_valid_moves()
+	moves = get_all_moves(pins) 
 	valid_squares = []
 	if len(checks) == 0:
 		return moves,checks  #minus pins which are calculated in individual move functions eg pawn_moves 
@@ -185,7 +156,7 @@ def resolve_checks(board,en_Passant):
 		check_row = check[0]
 		check_col = check[1]
 
-		if board[check_row][check_col] ==2 or board[check_row][check_col] ==8:#if knight - must take or move (no block)
+		if player_turn.board[check_row][check_col] ==2 or player_turn.board[check_row][check_col] ==8:#if knight - must take or move (no block)
 			valid_squares = [check_row,check_col]
 		else:
 			for i in range(1,8):
@@ -194,100 +165,20 @@ def resolve_checks(board,en_Passant):
 				if valid_square == (check_row,check_col):
 					break
 		moves = [move for move in moves if move[1] in valid_squares]  
-		moves = king_moves.k_moves(moves,king_row,king_col,board)		
+		moves = king_moves.k_moves(moves,king_row,king_col)		
 	elif len(checks) == 2:
-		moves = king_moves.k_moves(moves,king_row,king_col,board) 	
+		moves = king_moves.k_moves(moves,king_row,king_col) 	
 	return moves, checks
 
-def move_piece(old_square, new_square, board,en_Passant):
-	global en_p
-	old_row,old_col,new_row,new_col = old_square[0], old_square[1],new_square[0],new_square[1]
-	old_row, old_col,new_row,new_col  = int(old_row), int(old_col),int(new_row),int(new_col)
-	board = en_passant_take(old_row, old_col,new_row, new_col,en_p,board)
-	en_Passant = check_en_Passant(old_row, old_col,new_row,new_col,board) 
-	board = check_castle(old_row,old_col,new_row,new_col,board)
-	board = check_promotion(old_row,old_col,new_row,new_col,board)
-	
-	en_p = en_Passant
-
-	temp = board[old_row:old_row+1, old_col:old_col+1]
-	player_turn.taken_square.append(board[new_row][new_col])
-	if temp == 0: 
-		pass
-	else:
-		temp = int(temp)
-		board[new_row:new_row+1, new_col:new_col+1] = temp 
-		board[old_row:old_row+1, old_col:old_col+1] = 0
-
-	return board, en_Passant
-
-def undo_move(move_log,board):
-	# old_row,old_col,new_row,new_col = old_square[0], old_square[1],new_square[0],new_square[1]
-	# old_row, old_col,new_row,new_col  = int(old_row), int(old_col),int(new_row),int(new_col)
-
+def undo_move(move_log):
 	if len(move_log) !=0:
 		move = move_log.pop()
 		square = player_turn.taken_square.pop()
-		temp = board[move[1][0]][move[1][1]]
-		board[move[1][0]][move[1][1]] = square
-		board[move[0][0]][move[0][1]] = temp
+		temp = player_turn.board[move[1][0]][move[1][1]]
+		player_turn.board[move[1][0]][move[1][1]] = square
+		player_turn.board[move[0][0]][move[0][1]] = temp
 		player_turn.white_to_move = not player_turn.white_to_move
-		
 	return
-
-def check_en_Passant(old_row, old_col,new_row,new_col,board): #white to move logic here is null and void 
-	en_passant = []
-	if player_turn.white_to_move is False and board[old_row][old_col] == 7:
-		if old_row == 1 and new_row == 3:
-			en_passant.append((new_row, new_col))
-		else:
-			pass
-	elif player_turn.white_to_move is True and board[old_row][old_col] == 1:
-		if old_row == 6 and new_row == 4:
-			en_passant.append((new_row, new_col))
-		else:
-			pass
-	else:
-		pass 
-	return en_passant 
-
-def en_passant_take(old_r,old_c ,r,c,en_Passant,board):
-	if (player_turn.white_to_move is True) and (len(en_Passant)!= 0) and (r - old_r == -1) and (((old_r,old_c-1) in en_Passant) or ((old_r,old_c+1) in en_Passant)) and (old_c - c == -1 or old_c - c == 1):
-		board[en_Passant[0][0]][en_Passant[0][1]] = 0
-	elif (player_turn.white_to_move is False) and (len(en_Passant)!= 0) and (r - old_r == 1) and (((old_r,old_c-1) in en_Passant) or ((old_r,old_c+1) in en_Passant)) and (old_c - c == -1 or old_c - c == 1):
-		board[en_Passant[0][0]][en_Passant[0][1]] = 0
-
-	return board
-
-def check_promotion(old_r,old_c,r,c,board):
-	if player_turn.white_to_move is True and board[old_r][old_c] == 1 and r == 0:
-		board[old_r][old_c] = 5
-	elif player_turn.white_to_move is False and board[old_r][old_c] == 7 and r == 7:
-		board[old_r][old_c] = 11
-	else:
-		pass
-	return board
-
-def check_castle(old_r,old_c,r,c,board):
-	if old_r == 7 and old_c == 4:
-		if r == 7 and c == 2:
-			board[7][0] = 0
-			board[7][3] = 4
-		elif r == 7 and c == 6:
-			board[7][7] = 0
-			board[7][5] = 4
-		else:
-			pass
-	elif old_r ==0 and old_c ==4:
-		if r == 0 and c == 2:
-			board[0][0] = 0
-			board[0][3] = 10
-		elif r == 0 and c == 6:
-			board[0][7] = 0
-			board[0][5] = 10
-		else:
-			pass
-	return board
 
 def draw_board(window): #some of this should go in main 
 	colour1 = (235, 235, 208)
@@ -298,10 +189,10 @@ def draw_board(window): #some of this should go in main
 	    color = colors[((i+j) % 2)]
 	    p.draw.rect(window,color,p.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 	
-def display_image(images, window,chess_board):
+def display_image(images, window):
 	for i in range(8):
 	      for j in range(8):
-	      	piece = chess_board[i][j]
+	      	piece = player_turn.board[i][j]
 	      	if piece != 0:
 		      	window.blit(images[piece], p.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
