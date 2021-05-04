@@ -47,8 +47,10 @@ def en_passant_take(old_r,old_c ,r,c):
 def check_promotion(old_r,old_c,r,c):
 	if player_turn.white_to_move is True and player_turn.board[old_r][old_c] == 1 and r == 0:
 		player_turn.board[old_r][old_c] = 5
+		player_turn.white_promotion = True
 	elif player_turn.white_to_move is False and player_turn.board[old_r][old_c] == 7 and r == 7:
 		player_turn.board[old_r][old_c] = 11
+		player_turn.black_promotion = True
 	else:
 		pass
 	return
