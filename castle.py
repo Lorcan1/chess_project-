@@ -4,8 +4,8 @@ import valid_moves
 def castling(moves,move_log,checks):
 	white_left = False
 	white_right = False
-	black_left = True
-	black_right = True
+	black_left =  False
+	black_right = False
 	for move in move_log:
 		if player_turn.white_to_move is True:
 			if move[0] == (7,4):

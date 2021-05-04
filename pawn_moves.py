@@ -39,7 +39,6 @@ def p_moves(moves,r,c,pins): #add take functionality
 			moves.append([(r,c),(r-1,c+1)])
 		else:
 			pass
-		print(player_turn.en_p)
 		if player_turn.white_to_move ==  True and  r == 3 and (r,c-1)in player_turn.en_p: 
 			moves.append([(r,c),(r-1,c-1)])
 		elif player_turn.white_to_move ==  True and  r == 3 and (r,c+1) in player_turn.en_p: 
