@@ -31,10 +31,12 @@ def check_en_Passant(old_row, old_col,new_row,new_col):
 
 def en_passant_take(old_r,old_c ,r,c):
 	#en_passant_take removes the opponents piece from the board when the player plays en passant
-	if (player_turn.white_to_move is True) and (len(player_turn.en_p)!= 0) and (r - old_r == -1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
+	if (player_turn.white_to_move is True) and (c ==2) and (len(player_turn.en_p)!= 0) and (r - old_r == -1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
 		player_turn.board[player_turn.en_p[0][0]][player_turn.en_p[0][1]] = 0
 		player_turn.en_passant_bool = True
-	elif (player_turn.white_to_move is False) and (len(player_turn.en_p)!= 0) and (r - old_r == 1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
+	elif (player_turn.white_to_move is False) and(c == 4) and (len(player_turn.en_p)!= 0) and (r - old_r == 1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
+		print('hey')
+		print(r,old_r)
 		player_turn.board[player_turn.en_p[0][0]][player_turn.en_p[0][1]] = 0
 		player_turn.en_passant_bool = True
 	player_turn.en_p = []

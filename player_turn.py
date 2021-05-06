@@ -1,4 +1,4 @@
-white_to_move = False
+white_to_move = True
 en_passant_bool = False
 white_castle_kingside = False
 white_castle_queenside = False

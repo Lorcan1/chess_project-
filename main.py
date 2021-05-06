@@ -82,7 +82,7 @@ def main():
 
 		if move_made:
 			v_moves,checks = resolve_checks()
-#			print(v_moves)
+			print(len(v_moves))
 			v_moves = castle.castling(v_moves,move_log,checks)
 			if len(v_moves) == 0 : 
 				if len(checks) != 0:
@@ -181,6 +181,7 @@ def undo_move(move_log):
 
 		if player_turn.en_passant_bool: #en passant functionality 
 			if player_turn.white_to_move:
+				print('hi',move[0][0],move[0][1],move[1][0],move[1][1])
 				player_turn.board[(move[1][0]) -1][move[1][1]] = 1
 				player_turn.en_p.append((move[0][0],move[1][1]))
 			else:
@@ -215,6 +216,9 @@ def undo_move(move_log):
 			if player_turn.black_promotion == True:
 				player_turn.board[move[0][0]][move[0][1]] = 7
 				player_turn.black_promotion = False
+
+	# elif len(move_log) == 0:
+	# 	print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
 
 		player_turn.white_to_move = not player_turn.white_to_move
 	return
