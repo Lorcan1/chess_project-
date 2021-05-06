@@ -7,14 +7,11 @@ def move_piece(old_square, new_square):
 	check_en_Passant(old_row, old_col,new_row,new_col) 
 	check_castle(old_row,old_col,new_row,new_col)
 	check_promotion(old_row,old_col,new_row,new_col)
-	temp = player_turn.board[old_row:old_row+1, old_col:old_col+1]
+	temp = player_turn.board[old_row, old_col]
 	player_turn.taken_square.append(player_turn.board[new_row][new_col])
-	if temp == 0: 
-		pass
-	else:
-		temp = int(temp)
-		player_turn.board[new_row:new_row+1, new_col:new_col+1] = temp 
-		player_turn.board[old_row:old_row+1, old_col:old_col+1] = 0
+	temp = int(temp)
+	player_turn.board[new_row, new_col] = temp 
+	player_turn.board[old_row, old_col] = 0
 	return 
 
 def check_en_Passant(old_row, old_col,new_row,new_col): 

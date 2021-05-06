@@ -82,6 +82,7 @@ def main():
 
 		if move_made:
 			v_moves,checks = resolve_checks()
+#			print(v_moves)
 			v_moves = castle.castling(v_moves,move_log,checks)
 			if len(v_moves) == 0 : 
 				if len(checks) != 0:
