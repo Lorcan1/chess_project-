@@ -20,43 +20,38 @@ def p_moves(moves,r,c,pins): #add take functionality
 			pass
 	elif player_turn.white_to_move ==  False and  r != 7 and player_turn.board[r][c] == 7 and player_turn.board[r+1][c] == 0 and (piecePinned is False or d == (1,0)):
 		moves.append([(r,c),(r+1,c)]) #if black increase
-#		print(player_turn.board[r+2],(r+2,c))
 		if r == 1 and player_turn.board[r+2][c] == 0:
 			moves.append([(r,c),(r+2,c)])
 		else:
 			pass
 	else:
 		pass
-#takes
-	if piecePinned is True:
+# #takes
+	if player_turn.white_to_move ==  True and player_turn.board[r][c] == 1 and player_turn.board[r-1][c-1] in player_turn.black_pieces and 0<= r-1 <=7 and 0<= c-1 <=7 and (piecePinned is False or d == (-1,-1)): #take black
+		moves.append([(r,c),(r-1,c-1)])
+	else:
+		pass
+	if player_turn.white_to_move ==  True and player_turn.board[r][c] == 1 and c != 7 and player_turn.board[r-1][c+1] in player_turn.black_pieces and 0<= r-1 <=7 and 0<= c+1 <=7 and (piecePinned is False or d == (-1,1)):
+		moves.append([(r,c),(r-1,c+1)])
+	else:
 		pass
 
+	if player_turn.white_to_move ==  True and  r == 3 and player_turn.board[r][c] == 1 and (r,c-1)in player_turn.en_p and (piecePinned is False): 
+		moves.append([(r,c),(r-1,c-1)])
+	elif player_turn.white_to_move ==  True and  r == 3  and player_turn.board[r][c] == 1 and (r,c+1) in player_turn.en_p and (piecePinned is False): 
+		moves.append([(r,c),(r-1,c+1)])
+
+	if player_turn.white_to_move ==  False and  r != 7 and player_turn.board[r][c] == 7 and player_turn.board[r+1][c-1] in player_turn.white_pieces and 0<= r+1 <=7 and 0<= c-1 <=7 and (piecePinned is False or d == (1,-1)): #take white
+		moves.append([(r,c),(r+1,c-1)])
 	else:
-		if player_turn.white_to_move ==  True and player_turn.board[r][c] == 1 and player_turn.board[r-1][c-1] in player_turn.black_pieces and 0<= r-1 <=7 and 0<= c-1 <=7: #take black
-			moves.append([(r,c),(r-1,c-1)])
-		else:
-			pass
-		if player_turn.white_to_move ==  True and player_turn.board[r][c] == 1 and c != 7 and player_turn.board[r-1][c+1] in player_turn.black_pieces and 0<= r-1 <=7 and 0<= c+1 <=7:
-			moves.append([(r,c),(r-1,c+1)])
-		else:
-			pass
-
-		if player_turn.white_to_move ==  True and  r == 3 and player_turn.board[r][c] == 1 and (r,c-1)in player_turn.en_p: 
-			moves.append([(r,c),(r-1,c-1)])
-		elif player_turn.white_to_move ==  True and  r == 3  and player_turn.board[r][c] == 1 and (r,c+1) in player_turn.en_p: 
-			moves.append([(r,c),(r-1,c+1)])
-
-		if player_turn.white_to_move ==  False and  r != 7 and player_turn.board[r][c] == 7 and player_turn.board[r+1][c-1] in player_turn.white_pieces and 0<= r+1 <=7 and 0<= c-1 <=7: #take white
-			moves.append([(r,c),(r+1,c-1)])
-		else:
-			pass
-		if  player_turn.white_to_move ==  False and r != 7 and  player_turn.board[r][c] == 7 and c != 7 and player_turn.board[r+1][c+1] in player_turn.white_pieces and 0<= r+1 <=7 and 0<= c+1 <=7:
-			moves.append([(r,c),(r+1,c+1)])
-		else:
-			pass
-		if player_turn.white_to_move ==  False and  r == 4  and player_turn.board[r][c] == 7  and (r,c-1)in player_turn.en_p: 
-			moves.append([(r,c),(r+1,c-1)])
-		elif player_turn.white_to_move ==  False and  r == 4  and player_turn.board[r][c] == 7 and (r,c+1) in player_turn.en_p: 
-			moves.append([(r,c),(r+1,c+1)])
+		pass
+	if  player_turn.white_to_move ==  False and r != 7 and  player_turn.board[r][c] == 7 and c != 7 and player_turn.board[r+1][c+1] in player_turn.white_pieces and 0<= r+1 <=7 and 0<= c+1 <=7 and (piecePinned is False or d == (1,1)):
+		moves.append([(r,c),(r+1,c+1)])
+	else:
+		pass
+	if player_turn.white_to_move ==  False and  r == 4  and player_turn.board[r][c] == 7  and (r,c-1)in player_turn.en_p and (piecePinned is False): 
+		moves.append([(r,c),(r+1,c-1)])
+	elif player_turn.white_to_move ==  False and  r == 4  and player_turn.board[r][c] == 7 and (r,c+1) in player_turn.en_p and (piecePinned is False): 
+		moves.append([(r,c),(r+1,c+1)])
 
 	return moves

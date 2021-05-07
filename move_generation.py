@@ -2,6 +2,7 @@ import piece_mover,player_turn
 from main import resolve_checks,undo_move
 
 player_turn.read_fen(player_turn.board)
+print(player_turn.white_to_move)
 # print(player_turn.board)
 move_log  = []
 move_log_2 = []
@@ -13,6 +14,7 @@ def move_generation_test(depth,prev=0):
 
 	v_moves, checks = resolve_checks()
 	num_positions = 0
+	
 		
 	#print(len(v_moves))
 	for move in v_moves:
@@ -20,7 +22,7 @@ def move_generation_test(depth,prev=0):
 		player_turn.white_to_move = not player_turn.white_to_move
 		num_positions += move_generation_test(depth -1)
 		move_log.append(move)
-		if depth == 4:
+		if depth == player_turn.depth2:
 			y = num_positions - prev
 			notate = rename_notation(move[0],move[1])
 			print(move[0],move[1],notate,y)
@@ -41,7 +43,10 @@ def rename_notation(move1,move2):
 	d2 = {0:8,1:7,2:6 ,3:5,4:4,5:3,6:2,7:1}
 
 	return d1[move1[1]] + str(d2[move1[0]]) + d1[move2[1]] + str(d2[move2[0]]) 
-
-x= move_generation_test(4)
+depth = input("Enter depth: ")
+depth = int(depth)
+player_turn.depth2 = depth 
+x= move_generation_test(depth)
 print(x)
 #print(move_log_2)
+
