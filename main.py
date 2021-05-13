@@ -82,7 +82,6 @@ def main():
 
 		if move_made:
 			v_moves,checks = resolve_checks()
-			print(len(v_moves))
 			v_moves = castle.castling(v_moves,move_log,checks)
 			if len(v_moves) == 0 : 
 				if len(checks) != 0:
@@ -157,7 +156,7 @@ def resolve_checks():
 		check_col = check[1]
 
 		if player_turn.board[check_row][check_col] ==2 or player_turn.board[check_row][check_col] ==8:#if knight - must take or move (no block)
-			valid_squares = [check_row,check_col]
+			valid_squares.append((check_row,check_col))
 		else:
 			for i in range(1,8):
 				valid_square = (king_row + check[2]*i, king_col + check[3]*i) #search in direction of check until attacking piece is reached 
@@ -181,7 +180,6 @@ def undo_move(move_log):
 
 		if player_turn.en_passant_bool: #en passant functionality 
 			if player_turn.white_to_move:
-				print('hi',move[0][0],move[0][1],move[1][0],move[1][1])
 				player_turn.board[(move[1][0]) -1][move[1][1]] = 1
 				player_turn.en_p.append((move[0][0],move[1][1]))
 			else:
@@ -216,9 +214,6 @@ def undo_move(move_log):
 			if player_turn.black_promotion == True:
 				player_turn.board[move[0][0]][move[0][1]] = 7
 				player_turn.black_promotion = False
-
-	# elif len(move_log) == 0:
-	# 	print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
 
 		player_turn.white_to_move = not player_turn.white_to_move
 	return
