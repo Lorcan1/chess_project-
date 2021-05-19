@@ -1,5 +1,6 @@
 import piece_mover,player_turn
 from main import resolve_checks,undo_move
+import castle 
 
 player_turn.read_fen(player_turn.board)
 print(player_turn.white_to_move)
@@ -13,6 +14,8 @@ def move_generation_test(depth,prev=0):
 	#print(player_turn.board)
 
 	v_moves, checks = resolve_checks()
+	v_moves = castle.castling(v_moves,move_log,checks)
+
 	num_positions = 0
 	
 		

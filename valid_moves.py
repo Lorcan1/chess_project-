@@ -19,7 +19,7 @@ def get_valid_moves(board=player_turn.board,x=100,y=0):
 		king_row,king_col = get_king_location()
 	else:
 		king_row = x
-		king_col = y
+		king_col = y 
 	for j in range(len(directions)):
 		possible_pin = ()
 		direction = directions[j]
@@ -75,8 +75,8 @@ def get_valid_moves(board=player_turn.board,x=100,y=0):
 	knight_moves = [(-2,-1),(-1,-2),(-1,2),(-2,1),(2,-1),(1,-2),(1,2),(2,1)] #seperate loop needed for knight moves
 	for move in knight_moves:
 		if 0<= king_row+move[0] <=7 and 0<= king_col+move[1] <=7:
-			if board[king_row][king_col] == 12 and board[king_row+move[0]][king_col+move[1]] == 2: # and player_turn.white_to_move?
+			if player_turn.white_to_move is False and board[king_row+move[0]][king_col+move[1]] == 2: # and player_turn.white_to_move?
 				checks.append((king_row+move[0],king_col+move[1]))
-			elif board[king_row][king_col] == 6 and board[king_row+move[0]][king_col+move[1]] == 8:
+			elif player_turn.white_to_move is True and board[king_row+move[0]][king_col+move[1]] == 8:
 				checks.append((king_row+move[0],king_col+move[1]))
 	return checks,pins,king_row,king_col

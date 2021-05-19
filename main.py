@@ -21,13 +21,14 @@ def main():
 	clock = p.time.Clock()
 	window.fill((255, 255, 255))
 	player_turn.read_fen(player_turn.board)
+	move_log = []
 	v_moves, checks = resolve_checks()
+	v_moves = castle.castling(v_moves,move_log,checks)
 	move_made = False #dont generate moves untill gamestate changes 
 	images = load_images()
 	running = True
 	sq_clicked = ()
 	sqs_clicked = []
-	move_log = []
 	player_one = True #human is true, ai is false, for the white pieces
 	player_two = True #same as above but for black pieces. (could change to integer for different strength ai)
 	
