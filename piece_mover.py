@@ -53,16 +53,14 @@ def check_promotion(old_r,old_c,r,c):
 	return
 
 def check_castle(old_r,old_c,r,c):
-	if player_turn.board[old_r][old_c] == 6: 
+	if player_turn.board[old_r][old_c] == 6: #white
 		if old_r == 7 and old_c == 4:
-			if r == 7 and c == 2:
+			if r == 7 and c == 2: #queenside
 				player_turn.board[7][0] = 0
 				player_turn.board[7][3] = 4
-				player_turn.white_castle_queenside = True
-			elif r == 7 and c == 6:
+			elif r == 7 and c == 6: #kingside
 				player_turn.board[7][7] = 0
 				player_turn.board[7][5] = 4
-				player_turn.white_castle_kingside = True
 			else:
 				pass
 	elif player_turn.board[old_r][old_c] == 12:
@@ -70,11 +68,9 @@ def check_castle(old_r,old_c,r,c):
 			if r == 0 and c == 2:
 				player_turn.board[0][0] = 0
 				player_turn.board[0][3] = 10
-				player_turn.black_castle_queenside = True
 			elif r == 0 and c == 6:
 				player_turn.board[0][7] = 0
 				player_turn.board[0][5] = 10
-				player_turn.black_castle_kingside = True
 			else:
 				pass
 	return

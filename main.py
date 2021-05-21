@@ -168,6 +168,7 @@ def resolve_checks():
 		moves = king_moves.k_moves(moves,king_row,king_col)		
 	elif len(checks) == 2:
 		moves = king_moves.k_moves(moves,king_row,king_col) 	
+	moves = list(set(tuple(sorted(sub)) for sub in moves))
 	return moves, checks
 
 def undo_move(move_log):
@@ -187,25 +188,23 @@ def undo_move(move_log):
 				player_turn.board[(move[1][0]) +1][move[1][1]] = 7
 				player_turn.en_p.append((move[0][0],move[1][1]))
 		player_turn.en_passant_bool = False
-		
+
+			
 		if player_turn.white_to_move == False: #castling functioanlity
-			if player_turn.white_castle_kingside:
+			if move[0] == (7,4) and move[1] == (7,6):
 				player_turn.board[7][5] = 0
 				player_turn.board[7][7] = 4
-				player_turn.white_castle_kingside = False
-			elif player_turn.white_castle_queenside:
+				# player_turn.white_castle_kingside = False
+			elif move[0] == (7,4) and move[1] == (7,2):
 				player_turn.board[7][3] = 0
 				player_turn.board[7][0] = 4
-				player_turn.white_castle_queenside = False
 		elif player_turn.white_to_move == True:
-			if player_turn.black_castle_kingside:
+			if move[0] == (0,4) and move[1] == (0,6):
 				player_turn.board[0][5] = 0
 				player_turn.board[0][7] = 10
-				player_turn.black_castle_kingside = False
-			elif player_turn.black_castle_queenside:
+			elif move[0] == (0,4) and move[1] == (0,2):
 				player_turn.board[0][3] = 0
 				player_turn.board[0][0] = 10
-				player_turn.black_castle_queenside = False
 
 		if player_turn.white_to_move == False: #promotion functionality
 			if player_turn.white_promotion == True:
