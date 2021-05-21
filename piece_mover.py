@@ -31,25 +31,39 @@ def check_en_Passant(old_row, old_col,new_row,new_col):
 
 def en_passant_take(old_r,old_c ,r,c):
 	#en_passant_take removes the opponents piece from the board when the player plays en passant
-	if (player_turn.white_to_move is True) and (c ==2) and player_turn.board[r][c] == 0 and  (len(player_turn.en_p)!= 0) and (r - old_r == -1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
+	if (player_turn.white_to_move is True) and (r ==2) and player_turn.board[r][c] == 0 and  (len(player_turn.en_p)!= 0) and (r - old_r == -1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
 		player_turn.board[player_turn.en_p[0][0]][player_turn.en_p[0][1]] = 0
-		player_turn.en_passant_bool = True
-	elif (player_turn.white_to_move is False) and player_turn.board[r][c] == 0 and (c ==4) and (len(player_turn.en_p)!= 0) and (r - old_r == 1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
+		white_en_passant_bool = True
+		black_en_passant_bool = False
+
+	elif (player_turn.white_to_move is False) and player_turn.board[r][c] == 0 and (r ==5) and (len(player_turn.en_p)!= 0) and (r - old_r == 1) and (((old_r,old_c-1) in player_turn.en_p) or ((old_r,old_c+1) in player_turn.en_p)) and (old_c - c == -1 or old_c - c == 1) and c == player_turn.en_p[0][1]:
 		player_turn.board[player_turn.en_p[0][0]][player_turn.en_p[0][1]] = 0
-		player_turn.en_passant_bool = True
+		black_en_passant_bool = True
+		white_en_passant_bool = False
+	else:
+		white_en_passant_bool = False
+		black_en_passant_bool = False
 	player_turn.en_p = []
+	player_turn.white_en_p_list.append(white_en_passant_bool)
+	player_turn.black_en_p_list.append(black_en_passant_bool)
 
 	return
 
 def check_promotion(old_r,old_c,r,c):
 	if player_turn.white_to_move is True and player_turn.board[old_r][old_c] == 1 and r == 0:
 		player_turn.board[old_r][old_c] = 5
-		player_turn.white_promotion = True
+		white_promotion = True
+		black_promotion = False
 	elif player_turn.white_to_move is False and player_turn.board[old_r][old_c] == 7 and r == 7:
 		player_turn.board[old_r][old_c] = 11
-		player_turn.black_promotion = True
+		black_promotion = True
+		white_promotion = False
 	else:
-		pass
+		white_promotion = False
+		black_promotion = False
+	player_turn.white_promotion_list.append(white_promotion)
+	player_turn.black_promotion_list.append(black_promotion)
+
 	return
 
 def check_castle(old_r,old_c,r,c):
