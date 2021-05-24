@@ -1,6 +1,6 @@
 import numpy as np 
 import pygame as p
-import player_turn, pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,piece_mover,move_finder
+import player_turn, pawn_moves,knight_moves,bishop_moves,rook_moves,king_moves,valid_moves,castle,piece_mover,move_finder,move_undoer
 
 WIDTH = HEIGHT = 512
 DIMENSION = 8
@@ -70,12 +70,12 @@ def main():
 						pass
 			elif e.type == p.KEYDOWN:
 				if e.key == p.K_z:
-					undo_move(move_log)
+					move_undoer.undo_move(move_log)
 
 		if not human_turn:
 			ai_move = move_finder.find_random_move(v_moves)
 			# ai_move = move_finder.find_best_move(chess_board, v_moves)
-			piece_mover.move_piece(ai_move[0], ai_move[1], chess_board)
+			piece_mover.move_piece(ai_move[0], ai_move[1])
 			move_made = True
 			player_turn.white_to_move =  not player_turn.white_to_move
 			move_log.append(ai_move)
@@ -171,54 +171,54 @@ def resolve_checks():
 	moves = list(set(tuple(sorted(sub)) for sub in moves))
 	return moves, checks
 
-def undo_move(move_log):
-	#replaces curernt gamestate with previous one, note that white_to_move is opposite, 
-	if len(move_log) !=0:
-		move = move_log.pop()
-		white_promotion = player_turn.white_promotion_list.pop()
-		black_promotion = player_turn.black_promotion_list.pop()
-		white_en_passant_bool = player_turn.white_en_p_list.pop()
-		black_en_passant_bool = player_turn.black_en_p_list.pop()
+# def undo_move(move_log):
+# 	#replaces curernt gamestate with previous one, note that white_to_move is opposite, 
+# 	if len(move_log) !=0:
+# 		move = move_log.pop()
+# 		white_promotion = player_turn.white_promotion_list.pop()
+# 		black_promotion = player_turn.black_promotion_list.pop()
+# 		white_en_passant_bool = player_turn.white_en_p_list.pop()
+# 		black_en_passant_bool = player_turn.black_en_p_list.pop()
 
-		square = player_turn.taken_square.pop()
-		temp = player_turn.board[move[1][0]][move[1][1]]
-		player_turn.board[move[1][0]][move[1][1]] = square
-		player_turn.board[move[0][0]][move[0][1]] = temp
+# 		square = player_turn.taken_square.pop()
+# 		temp = player_turn.board[move[1][0]][move[1][1]]
+# 		player_turn.board[move[1][0]][move[1][1]] = square
+# 		player_turn.board[move[0][0]][move[0][1]] = temp
 
-		if black_en_passant_bool  : #en passant functionality 
-				player_turn.board[(move[1][0]) -1][move[1][1]] = 1
-				player_turn.en_p.append((move[0][0],move[1][1]))
-		elif white_en_passant_bool:
-				player_turn.board[(move[1][0]) +1][move[1][1]] = 7
-				player_turn.en_p.append((move[0][0],move[1][1]))
+# 		if black_en_passant_bool  : #en passant functionality 
+# 				player_turn.board[(move[1][0]) -1][move[1][1]] = 1
+# 				player_turn.en_p.append((move[0][0],move[1][1]))
+# 		elif white_en_passant_bool:
+# 				player_turn.board[(move[1][0]) +1][move[1][1]] = 7
+# 				player_turn.en_p.append((move[0][0],move[1][1]))
 			
-		if player_turn.white_to_move == False: #castling functioanlity
-			if move[0] == (7,4) and move[1] == (7,6):
-				player_turn.board[7][5] = 0
-				player_turn.board[7][7] = 4
-				# player_turn.white_castle_kingside = False
-			elif move[0] == (7,4) and move[1] == (7,2):
-				player_turn.board[7][3] = 0
-				player_turn.board[7][0] = 4
-		elif player_turn.white_to_move == True:
-			if move[0] == (0,4) and move[1] == (0,6):
-				player_turn.board[0][5] = 0
-				player_turn.board[0][7] = 10
-			elif move[0] == (0,4) and move[1] == (0,2):
-				player_turn.board[0][3] = 0
-				player_turn.board[0][0] = 10
+# 		if player_turn.white_to_move == False: #castling functioanlity
+# 			if move[0] == (7,4) and move[1] == (7,6):
+# 				player_turn.board[7][5] = 0
+# 				player_turn.board[7][7] = 4
+# 				# player_turn.white_castle_kingside = False
+# 			elif move[0] == (7,4) and move[1] == (7,2):
+# 				player_turn.board[7][3] = 0
+# 				player_turn.board[7][0] = 4
+# 		elif player_turn.white_to_move == True:
+# 			if move[0] == (0,4) and move[1] == (0,6):
+# 				player_turn.board[0][5] = 0
+# 				player_turn.board[0][7] = 10
+# 			elif move[0] == (0,4) and move[1] == (0,2):
+# 				player_turn.board[0][3] = 0
+# 				player_turn.board[0][0] = 10
 
  
-		if white_promotion: #promotion functionality
-			player_turn.board[move[0][0]][move[0][1]] = 1
-			player_turn.white_promotion = False
+# 		if white_promotion: #promotion functionality
+# 			player_turn.board[move[0][0]][move[0][1]] = 1
+# 			player_turn.white_promotion = False
 	
-		elif black_promotion == True:
-			player_turn.board[move[0][0]][move[0][1]] = 7
-			player_turn.black_promotion = False
+# 		elif black_promotion == True:
+# 			player_turn.board[move[0][0]][move[0][1]] = 7
+# 			player_turn.black_promotion = False
 
-		player_turn.white_to_move = not player_turn.white_to_move
-	return
+# 		player_turn.white_to_move = not player_turn.white_to_move
+# 	return
 
 def draw_board(window): #some of this should go in main 
 	colour1 = (235, 235, 208)

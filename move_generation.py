@@ -1,7 +1,8 @@
 import piece_mover,player_turn
-from main import resolve_checks,undo_move
+from main import resolve_checks
 import castle
 import csv
+import move_undoer
 
 player_turn.read_fen(player_turn.board)
 print(player_turn.white_to_move)
@@ -30,7 +31,7 @@ def move_generation_test(depth,move=0,prev=0):
 			print(move[0],move[1],notate,y)
 			prev = num_positions
 		
-		undo_move(move_log)
+		move_undoer.undo_move(move_log)
 
 	return num_positions
 

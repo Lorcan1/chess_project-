@@ -1,5 +1,9 @@
 
 import player_turn
+# from main import undo_move
+# import piece_mover
+# import valid_moves
+import en_p_pinned_check
 
 
 def p_moves(moves,r,c,pins): #add take functionality
@@ -26,7 +30,7 @@ def p_moves(moves,r,c,pins): #add take functionality
 			pass
 	else:
 		pass
-# #takes
+ #takes
 	if player_turn.white_to_move ==  True and player_turn.board[r][c] == 1 and player_turn.board[r-1][c-1] in player_turn.black_pieces and 0<= r-1 <=7 and 0<= c-1 <=7 and (piecePinned is False or d == (-1,-1)): #take black
 		moves.append([(r,c),(r-1,c-1)])
 	else:
@@ -35,12 +39,10 @@ def p_moves(moves,r,c,pins): #add take functionality
 		moves.append([(r,c),(r-1,c+1)])
 	else:
 		pass
-
 	if player_turn.white_to_move ==  True and  r == 3 and player_turn.board[r][c] == 1 and (r,c-1)in player_turn.en_p and (piecePinned is False): 
-		moves.append([(r,c),(r-1,c-1)])
+		moves = en_p_pinned_check.get_en_p_pinned((r,c),(r-1,c-1),moves)
 	elif player_turn.white_to_move ==  True and  r == 3  and player_turn.board[r][c] == 1 and (r,c+1) in player_turn.en_p and (piecePinned is False): 
-		moves.append([(r,c),(r-1,c+1)])
-
+		moves = en_p_pinned_check.get_en_p_pinned((r,c),(r-1,c+1),moves)
 	if player_turn.white_to_move ==  False and  r != 7 and player_turn.board[r][c] == 7 and player_turn.board[r+1][c-1] in player_turn.white_pieces and 0<= r+1 <=7 and 0<= c-1 <=7 and (piecePinned is False or d == (1,-1)): #take white
 		moves.append([(r,c),(r+1,c-1)])
 	else:
@@ -50,8 +52,7 @@ def p_moves(moves,r,c,pins): #add take functionality
 	else:
 		pass
 	if player_turn.white_to_move ==  False and  r == 4  and player_turn.board[r][c] == 7  and (r,c-1)in player_turn.en_p and (piecePinned is False): 
-		moves.append([(r,c),(r+1,c-1)])
+		moves = en_p_pinned_check.get_en_p_pinned((r,c),(r+1,c-1),moves)
 	elif player_turn.white_to_move ==  False and  r == 4  and player_turn.board[r][c] == 7 and (r,c+1) in player_turn.en_p and (piecePinned is False): 
-		moves.append([(r,c),(r+1,c+1)])
-
+		moves = en_p_pinned_check.get_en_p_pinned((r,c),(r+1,c+1),moves)
 	return moves
